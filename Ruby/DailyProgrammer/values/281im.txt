@@ -1,0 +1,6 @@
+Donald Knuth
+Alan Turing
+Claude Shannon
+Ada Lovelace
+Haskell Curry
+Peter Heiss
