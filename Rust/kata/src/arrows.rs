@@ -16,6 +16,25 @@ enum TailToken {
 enum ArrowToken {
     Head(ArrowHeadToken),
     Tail(TailToken),
+    Separator,
+}
+
+impl ArrowHeadToken {
+    fn get_value(&self) -> i64 {
+        match self {
+            ArrowHeadToken::LeftArrow => -1,
+            ArrowHeadToken::RightArrow => 1,
+        }
+    }
+}
+
+impl TailToken {
+    fn get_value(&self) -> i64 {
+        match self {
+            TailToken::SingleTail => 1,
+            TailToken::DoubleTail => 2,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -42,7 +61,7 @@ impl TryFrom<&str> for ArrowToken {
             ">" => Ok(ArrowToken::Head(ArrowHeadToken::RightArrow)),
             "-" => Ok(ArrowToken::Tail(TailToken::SingleTail)),
             "=" => Ok(ArrowToken::Tail(TailToken::DoubleTail)),
-            _ => Err(ArrowTokenError::InvalidToken(value.chars().next().unwrap())),
+            _ => Ok(ArrowToken::Separator),
         }
     }
 }
@@ -75,7 +94,7 @@ struct Arrow {
     start_token: Option<ArrowHeadToken>,
     end_token: Option<ArrowHeadToken>,
     tail_token: Option<TailToken>,
-    count: u32,
+    count: usize,
 }
 
 impl Arrow {
@@ -88,25 +107,25 @@ impl Arrow {
         }
     }
 
-    fn finish(&self) -> i64 {
-        if self.start_token.is_some() && self.end_token.is_some()
-            || self.start_token.is_none() && self.end_token.is_none()
-        {
+    fn get_value(&self) -> i64 {
+        if self.start_token.is_some() && self.end_token.is_some() {
             return 0;
         }
 
-        let prefix: i64 = if self.start_token.is_some() { -1 } else { 1 };
+        if self.start_token.is_none() && self.end_token.is_none() {
+            return 0;
+        }
 
-        1 + prefix
-            * (self.count) as i64
-            * self
-                .tail_token
-                .as_ref()
-                .map(|t| match t {
-                    TailToken::SingleTail => 1,
-                    TailToken::DoubleTail => 2,
-                })
-                .unwrap_or(1)
+        let mut prefix = 1;
+        if let Some(_start_token) = self.start_token {
+            prefix *= -1;
+        }
+
+        if let Some(tail_token) = self.tail_token {
+            return prefix * (tail_token.get_value() * (self.count as i64 + 1));
+        } else {
+            prefix
+        }
     }
 }
 
@@ -142,6 +161,9 @@ impl IntoIterator for ArrowTokenizer {
                         arrow = Arrow::new();
                     }
                     arrow.start_token = Some(ArrowHeadToken::LeftArrow);
+                    // Reset tails, because we have a new arrow
+                    arrow.count = 0;
+                    arrow.tail_token = None;
                 }
                 ArrowToken::Head(ArrowHeadToken::RightArrow) => {
                     if arrow.end_token.is_some() {
@@ -163,10 +185,15 @@ impl IntoIterator for ArrowTokenizer {
                     arrow.tail_token = Some(tail);
                     arrow.count += 1;
                 }
+                ArrowToken::Separator => {
+                    arrows.push(arrow);
+                    arrow = Arrow::new();
+                }
             }
         }
         arrows.push(arrow);
-        println!("{:?}", arrows);
+        println!("Sum of values: {}", arrows.iter().map(|a| a.get_value()).sum::<i64>());
+        arrows.iter().for_each(|a| println!("values: {}, {:?}", a.get_value(), a));
         ArrowIterator { arrows, index: 0 }
     }
 }
@@ -190,9 +217,11 @@ impl Iterator for ArrowIterator {
 }
 
 pub fn arrow_search(string: &str) -> i64 {
+    println!("got: {}", string);
+
     ArrowTokenizer::new(string)
         .into_iter()
-        .map(|a| a.finish())
+        .map(|a| a.get_value())
         .sum()
 }
 
@@ -213,5 +242,12 @@ pub mod tests {
         pretty_assert_eq(arrow_search(">===>->"), 11);
         pretty_assert_eq(arrow_search("......"), 0);
         pretty_assert_eq(arrow_search("<-->"), 0);
+        pretty_assert_eq(arrow_search("<."), -1);
+        pretty_assert_eq(arrow_search("<<."), -2);
+        pretty_assert_eq(arrow_search(">."), 1);
+        pretty_assert_eq(arrow_search(">>."), 2);
+        pretty_assert_eq(arrow_search("-<-"), -2);
+        pretty_assert_eq(arrow_search("->-"), 2);
+        pretty_assert_eq(arrow_search("<.-"), -1);
     }
 }
