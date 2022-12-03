@@ -52,39 +52,14 @@ enum TailTokenError {
     InvalidTail,
 }
 
-impl TryFrom<&str> for ArrowToken {
-    type Error = ArrowTokenError;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
+impl From<&str> for ArrowToken {
+    fn from(value: &str) -> Self {
         match value {
-            "<" => Ok(ArrowToken::Head(ArrowHeadToken::LeftArrow)),
-            ">" => Ok(ArrowToken::Head(ArrowHeadToken::RightArrow)),
-            "-" => Ok(ArrowToken::Tail(TailToken::SingleTail)),
-            "=" => Ok(ArrowToken::Tail(TailToken::DoubleTail)),
-            _ => Ok(ArrowToken::Separator),
-        }
-    }
-}
-
-impl TryFrom<&str> for ArrowHeadToken {
-    type Error = ArrowHeadTokenError;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "<" => Ok(ArrowHeadToken::LeftArrow),
-            ">" => Ok(ArrowHeadToken::RightArrow),
-            _ => Err(ArrowHeadTokenError::InvalidArrow),
-        }
-    }
-}
-impl TryFrom<&str> for TailToken {
-    type Error = TailTokenError;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "-" => Ok(TailToken::SingleTail),
-            "=" => Ok(TailToken::DoubleTail),
-            _ => Err(TailTokenError::InvalidTail),
+            "<" => ArrowToken::Head(ArrowHeadToken::LeftArrow),
+            ">" => ArrowToken::Head(ArrowHeadToken::RightArrow),
+            "-" => ArrowToken::Tail(TailToken::SingleTail),
+            "=" => ArrowToken::Tail(TailToken::DoubleTail),
+            _ => ArrowToken::Separator,
         }
     }
 }
@@ -137,8 +112,7 @@ impl ArrowTokenizer {
     fn new(text: &str) -> Self {
         let tokens = text
             .chars()
-            .map(|c| ArrowToken::try_from(c.to_string().as_str()))
-            .filter_map(Result::ok)
+            .map(|c| ArrowToken::from(c.to_string().as_str()))
             .collect::<Vec<ArrowToken>>();
 
         ArrowTokenizer { tokens }
