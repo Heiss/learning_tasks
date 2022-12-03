@@ -1,8 +1,10 @@
-use adventofcode::{day1, day2};
+use adventofcode::{day1, day2, day3};
 
 fn main() {
     let input = include_str!("./day1.txt");
     day1(input);
     let input = include_str!("./day2.txt");
     day2(input);
+    let input = include_str!("./day3.txt");
+    day3(input);
 }
