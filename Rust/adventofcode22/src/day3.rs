@@ -133,16 +133,20 @@ pub fn day3(text: &str) {
 mod tests {
     use super::{day3_part1, day3_part2};
 
-    #[test]
-    fn fixed_tests() {
-        let test_input = r#"vJrwpWtwJgWrhcsFMMfFFhFp
+    const TEST_INPUT: &str = r#"vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
 PmmdzqPrVvPwwTWBwg
 wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
 ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw"#;
 
-        assert_eq!(day3_part1(test_input), 157);
-        assert_eq!(day3_part2(test_input), 70);
+    #[test]
+    fn fixed_tests1() {
+        assert_eq!(day3_part1(TEST_INPUT), 157);
+    }
+
+    #[test]
+    fn fixed_tests2() {
+        assert_eq!(day3_part2(TEST_INPUT), 70);
     }
 }
