@@ -166,8 +166,6 @@ impl IntoIterator for ArrowTokenizer {
             }
         }
         arrows.push(arrow);
-        println!("Sum of values: {}", arrows.iter().map(|a| a.get_value()).sum::<i64>());
-        arrows.iter().for_each(|a| println!("values: {}, {:?}", a.get_value(), a));
         ArrowIterator { arrows, index: 0 }
     }
 }
@@ -191,8 +189,6 @@ impl Iterator for ArrowIterator {
 }
 
 pub fn arrow_search(string: &str) -> i64 {
-    println!("got: {}", string);
-
     ArrowTokenizer::new(string)
         .into_iter()
         .map(|a| a.get_value())
