@@ -130,8 +130,8 @@ fn day2_part2(text: &str) -> u64 {
 }
 
 pub fn day2(text: &str) {
-    println!("Day 2 part 1: {}", day2_part1(text));
-    println!("Day 2 part 2: {}", day2_part2(text));
+    println!("Day2 part 1: {}", day2_part1(text));
+    println!("Day2 part 2: {}", day2_part2(text));
 }
 
 #[cfg(test)]
