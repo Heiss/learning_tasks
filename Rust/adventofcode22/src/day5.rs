@@ -123,7 +123,7 @@ impl TryFrom<&str> for Crane {
             steps: value
                 .lines()
                 .map(Steps::try_from)
-                .map(Result::unwrap)
+                .filter_map(Result::ok)
                 .collect(),
         })
     }
@@ -138,8 +138,9 @@ impl<'a> Ship<'a> {
     fn execute_9000(&mut self) {
         for step in self.crane.steps.iter() {
             for i in 0..step.count {
-                let crate_ = self.staple_of_crates[step.from].pop().unwrap();
-                self.staple_of_crates[step.to].push(crate_);
+                if let Some(crate_) = self.staple_of_crates[step.from].pop() {
+                    self.staple_of_crates[step.to].push(crate_);
+                }
             }
         }
     }
@@ -162,8 +163,8 @@ impl<'a> Ship<'a> {
         self.staple_of_crates
             .iter()
             .map(|staple| staple.last())
-            .filter(|crate_| crate_.is_some())
-            .map(|crate_| crate_.unwrap().symbol.0)
+            .filter_map(|symbol| symbol)
+            .map(|crate_| crate_.symbol.0)
             .join("")
     }
 }
@@ -208,13 +209,13 @@ impl<'a> TryFrom<&'a str> for Ship<'a> {
 }
 
 fn day5_part1(text: &str) -> String {
-    let mut ship = Ship::try_from(text).unwrap();
+    let mut ship = Ship::try_from(text).expect("Invalid input");
     ship.execute_9000();
     ship.get_top_crates()
 }
 
 fn day5_part2(text: &str) -> String {
-    let mut ship = Ship::try_from(text).unwrap();
+    let mut ship = Ship::try_from(text).expect("Invalid input");
     ship.execute_9001();
     ship.get_top_crates()
 }
