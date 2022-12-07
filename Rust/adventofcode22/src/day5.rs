@@ -58,7 +58,6 @@ impl TryFrom<&str> for Steps {
 }
 
 struct CrateBuilderIterator<'a> {
-    haystack: &'a str,
     iter: Skip<Split<'a, &'a str>>,
     symbols_found: usize,
     symbols_count: usize,
@@ -67,7 +66,6 @@ struct CrateBuilderIterator<'a> {
 impl<'a> CrateBuilderIterator<'a> {
     fn new(haystack: &'a str, symbols_count: usize) -> Self {
         Self {
-            haystack,
             iter: haystack.split("").skip(1),
             symbols_found: 0,
             symbols_count,
@@ -137,7 +135,7 @@ struct Ship<'a> {
 impl<'a> Ship<'a> {
     fn execute_9000(&mut self) {
         for step in self.crane.steps.iter() {
-            for i in 0..step.count {
+            for _i in 0..step.count {
                 if let Some(crate_) = self.staple_of_crates[step.from].pop() {
                     self.staple_of_crates[step.to].push(crate_);
                 }
@@ -148,7 +146,7 @@ impl<'a> Ship<'a> {
     fn execute_9001(&mut self) {
         for step in self.crane.steps.iter() {
             let mut holding = Vec::new();
-            for i in 0..step.count {
+            for _i in 0..step.count {
                 if let Some(crate_) = self.staple_of_crates[step.from].pop() {
                     holding.push(crate_);
                 }
@@ -174,7 +172,7 @@ impl<'a> TryFrom<&'a str> for Ship<'a> {
 
     fn try_from(value: &'a str) -> Result<Self, Self::Error> {
         // take all lines with crate data until there is an empty line, the rest are move instructions
-        let mut crates_iter = value.lines().skip_while(|&v| !v.is_empty()).skip(1);
+        let crates_iter = value.lines().skip_while(|&v| !v.is_empty()).skip(1);
         let mut crates_iter_backworts = value.lines().rev().skip_while(|&v| !v.is_empty()).skip(1);
 
         let count_of_crates = crates_iter_backworts

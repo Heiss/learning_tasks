@@ -139,19 +139,19 @@ impl<'a> TryFrom<&'a str> for Directory {
                             .unwrap()
                             .add_entry(Entry::Directory(current_dir));
                     }
-                    v => {
+                    _ => {
                         directories.push(Directory::new());
                     }
                 },
                 Command::ListDirectory(Response(response)) => {
-                    let mut entries: Vec<Entry> = response
+                    let entries: Vec<Entry> = response
                         .lines()
                         .map(|line| Entry::try_from(line).unwrap())
                         .collect();
 
                     for entry in entries.into_iter() {
                         match entry {
-                            Entry::Directory(directory) => {} // ignore directories, because they are useless if we do not cd into them.
+                            Entry::Directory(_) => {} // ignore directories, because they are useless if we do not cd into them.
                             Entry::File(file) => {
                                 directories.last_mut().unwrap().add_entry(Entry::File(file))
                             }
