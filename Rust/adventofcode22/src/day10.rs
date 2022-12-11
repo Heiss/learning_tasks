@@ -132,7 +132,6 @@ pub fn day10(text: &str) {
 #[cfg(test)]
 mod tests {
     use super::{day10_part1, day10_part2};
-    use crate::day10::{Operation, Operations};
 
     const TEST_INPUT: &str = r#"addx 15
 addx -11
@@ -288,6 +287,15 @@ noop"#;
 
     #[test]
     fn fixed_tests2() {
-        assert_eq!(day10_part2(TEST_INPUT), 0);
+        assert_eq!(
+            day10_part2(TEST_INPUT),
+            r#"
+##..##..##..##..##..##..##..##..##..##..
+###...###...###...###...###...###...###.
+####....####....####....####....####....
+#####.....#####.....#####.....#####.....
+######......######......######......####
+#######.......#######.......#######....."#
+        );
     }
 }

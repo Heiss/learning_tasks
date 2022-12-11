@@ -233,7 +233,6 @@ $ ls
     #[test]
     fn fixed_tests1() {
         assert_eq!(day7_part1(TEST_INPUT), 95437);
-        /// Taken grateful from https://www.reddit.com/r/adventofcode/comments/zf791a/comment/izackde/?utm_source=share&utm_medium=web2x&context=3
         assert_eq!(
             day7_part1(
                 r#"$ cd /
