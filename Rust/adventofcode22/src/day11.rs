@@ -237,7 +237,8 @@ fn day11_part2(text: &str) -> usize {
     let base = monkeys
         .monkeys
         .iter()
-        .fold(1, |prod, monkey| prod * monkey.divisible);
+        .map(|monkey| monkey.divisible)
+        .product();
     monkeys.calm_factor = CalmFactor::Part2(base);
 
     monkeys
