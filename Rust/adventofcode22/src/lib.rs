@@ -1,6 +1,7 @@
 mod day1;
 mod day10;
 mod day11;
+mod day12;
 mod day2;
 mod day3;
 mod day4;
@@ -30,4 +31,6 @@ pub fn run() {
     day10::day10(input);
     let input = include_str!("./day11.txt");
     day11::day11(input);
+    let input = include_str!("./day12.txt");
+    day12::day12(input);
 }
