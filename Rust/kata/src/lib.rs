@@ -1,4 +1,5 @@
 mod arrows;
+mod basic_op;
 mod bookstock;
 mod braces;
 mod closest_pair;
