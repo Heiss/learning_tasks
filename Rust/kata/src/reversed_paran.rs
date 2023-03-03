@@ -63,7 +63,7 @@ impl Paran {
 }
 
 fn solve(s: &str) -> Option<usize> {
-    let mut paran = Paran::try_from(s).ok()?;
+    let paran = Paran::try_from(s).ok()?;
     paran.get_reverse_count().ok()
 }
 
