@@ -14,6 +14,7 @@ mod move_zeros;
 mod nearest_sqr;
 mod partlist;
 mod points;
+mod power_set;
 mod rabbit_fibonacci;
 mod reversed_paran;
 mod rockpaperscissors;
