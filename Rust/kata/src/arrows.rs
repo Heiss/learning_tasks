@@ -1,5 +1,3 @@
-use std::vec::IntoIter;
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 enum ArrowHeadToken {
     LeftArrow,
@@ -19,15 +17,6 @@ enum ArrowToken {
     Separator,
 }
 
-impl ArrowHeadToken {
-    fn get_value(&self) -> i64 {
-        match self {
-            ArrowHeadToken::LeftArrow => -1,
-            ArrowHeadToken::RightArrow => 1,
-        }
-    }
-}
-
 impl TailToken {
     fn get_value(&self) -> i64 {
         match self {
@@ -35,21 +24,6 @@ impl TailToken {
             TailToken::DoubleTail => 2,
         }
     }
-}
-
-#[derive(Debug, Clone, Copy)]
-enum ArrowTokenError {
-    InvalidToken(char),
-}
-
-#[derive(Debug, Clone, Copy)]
-enum ArrowHeadTokenError {
-    InvalidArrow,
-}
-
-#[derive(Debug, Clone, Copy)]
-enum TailTokenError {
-    InvalidTail,
 }
 
 impl From<&str> for ArrowToken {

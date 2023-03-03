@@ -1,5 +1,3 @@
-use itertools::Itertools;
-
 struct LongestConsec<'a> {
     strings: &'a [&'a str],
     k: usize,

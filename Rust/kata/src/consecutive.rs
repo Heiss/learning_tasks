@@ -5,14 +5,11 @@ struct Longest<'a> {
 
 impl<'a> Longest<'a> {
     fn new(text: &'a str) -> Longest<'a> {
-        Longest {
-            index: 0,
-            text,
-        }
+        Longest { index: 0, text }
     }
 }
 
-impl<'a> std::iter::Iterator for Longest<'a> {
+impl<'a> Iterator for Longest<'a> {
     type Item = (char, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -34,13 +31,10 @@ impl<'a> std::iter::Iterator for Longest<'a> {
 }
 
 pub fn longest_repetition(s: &str) -> Option<(char, usize)> {
-    let mut longest = Longest::new(s);
-    longest.fold(None, |acc, (c, len)| {
-        match acc {
-            Some((_, count)) =>
-                (len > count).then(|| (c, len)).or_else(|| acc),
-            _ => Some((c, len)),
-        }
+    let longest = Longest::new(s);
+    longest.fold(None, |acc, (c, len)| match acc {
+        Some((_, count)) => (len > count).then(|| (c, len)).or_else(|| acc),
+        _ => Some((c, len)),
     })
 }
 
