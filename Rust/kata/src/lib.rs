@@ -8,6 +8,8 @@ mod consecutive_pairs;
 mod count9;
 mod count_divisors;
 mod disemvowel;
+mod esolang_1;
+mod esolang_3;
 mod likedislike;
 mod longest_consec;
 mod make_valley;
