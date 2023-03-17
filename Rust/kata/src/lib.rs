@@ -23,5 +23,6 @@ mod strongnumbers;
 mod sumofnumbers;
 mod supermarket;
 mod tortoise;
+mod two_sum;
 mod twotoone;
 mod vaporwave;
