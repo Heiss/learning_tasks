@@ -12,6 +12,7 @@ mod longest_consec;
 mod make_valley;
 mod move_zeros;
 mod nearest_sqr;
+mod non_consecutive;
 mod partlist;
 mod points;
 mod power_set;
