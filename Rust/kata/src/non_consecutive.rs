@@ -1,14 +1,22 @@
 // https://www.codewars.com/kata/58f8b35fda19c0c79400020f
+use std::ops::Add;
 
 trait NonConsecutive {
-    fn all_non_consecutive(&self) -> Vec<(usize, i32)>;
+    type Item;
+
+    fn all_non_consecutive(&self) -> Vec<(usize, Self::Item)>;
 }
 
-impl NonConsecutive for [i32] {
-    fn all_non_consecutive(&self) -> Vec<(usize, i32)> {
+impl<T> NonConsecutive for [T]
+where
+    T: Add<Output = T> + PartialEq + Copy + From<i8>,
+{
+    type Item = T;
+
+    fn all_non_consecutive(&self) -> Vec<(usize, Self::Item)> {
         self.windows(2)
             .enumerate()
-            .filter(|(_, w)| w[0] + 1 != w[1])
+            .filter(|(_, w)| w[0] + T::from(1) != w[1])
             .map(|(i, w)| (i + 1, w[1]))
             .collect()
     }
