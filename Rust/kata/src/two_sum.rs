@@ -28,22 +28,22 @@ impl<'a> FinderBuilder<'a> {
     /// Create a finder
     /// Make some heavy stuff.
     fn create_finder(&self) -> Finder {
-        let mut hashMap = HashMap::new();
+        let mut hash_map = HashMap::new();
 
         for (index, number) in self.numbers.iter().enumerate() {
-            let entry = hashMap.entry(number).or_insert_with(Vec::new);
+            let entry = hash_map.entry(number).or_insert_with(Vec::new);
             entry.push(index);
         }
 
         Finder {
-            hashMap,
+            hash_map,
             target: self.target,
         }
     }
 }
 
 struct Finder<'a> {
-    hashMap: HashMap<&'a GivenNumber, Vec<PositionInGivenArray>>,
+    hash_map: HashMap<&'a GivenNumber, Vec<PositionInGivenArray>>,
     target: &'a FindNumber,
 }
 
@@ -51,7 +51,7 @@ impl<'a> Finder<'a> {
     fn find(&self) -> Result<Solution> {
         let mut solution = None;
 
-        for (&current_number, position_of_current_number) in self.hashMap.iter() {
+        for (&current_number, position_of_current_number) in self.hash_map.iter() {
             let difference: FindNumber = self.target - current_number;
 
             // falls difference diesselbe Zahl ergibt, dann muss die Zahl mindestens 2 mal vorkommen,
@@ -74,7 +74,7 @@ impl<'a> Finder<'a> {
     }
 
     fn get_index(&self, number: &FindNumber) -> Option<Vec<PositionInGivenArray>> {
-        self.hashMap.get(&number).map(|v| v.clone())
+        self.hash_map.get(&number).map(|v| v.clone())
     }
 }
 
