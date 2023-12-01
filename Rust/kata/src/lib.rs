@@ -27,6 +27,7 @@ mod reversed_paran;
 mod rockpaperscissors;
 //mod simple_interactive_interpreter;
 mod camel_case;
+mod count_characters;
 mod stringmatchup;
 mod strongnumbers;
 mod sumofnumbers;
