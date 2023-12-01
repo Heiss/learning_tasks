@@ -24,9 +24,7 @@ impl CalibrationValue {
     }
 
     fn part2(&mut self) -> usize {
-        let mut lines = std::mem::replace(&mut self.lines, Vec::new());
-
-        for line in &mut lines {
+        for line in &mut self.lines {
             let mut found_numbers: HashMap<Position, Number> = HashMap::new();
             for (number_index, &number) in NUMBERS.iter().enumerate() {
                 // could be more than one occurrence in a line
@@ -50,7 +48,6 @@ impl CalibrationValue {
             }
         }
 
-        self.lines = lines;
         self.sum()
     }
 }
