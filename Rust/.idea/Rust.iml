@@ -11,6 +11,7 @@
       <sourceFolder url="file://$MODULE_DIR$/guess-game/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/leetcode/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/adventofcode23/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/adventofcode20/target" />
       <excludeFolder url="file://$MODULE_DIR$/adventofcode22/target" />
       <excludeFolder url="file://$MODULE_DIR$/kata/target" />
