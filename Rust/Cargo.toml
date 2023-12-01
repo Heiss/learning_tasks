@@ -6,4 +6,4 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
-members = ["adventofcode20", "adventofcode21", "adventofcode22", "design-patterns", "guess-game", "kata", "leetcode"]
+members = ["adventofcode20", "adventofcode21", "adventofcode22", "adventofcode23", "design-patterns", "guess-game", "kata", "leetcode"]
