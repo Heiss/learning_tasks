@@ -46,8 +46,7 @@ impl Matrix {
     }
 
     fn get_gears(&self) -> Vec<Point> {
-        let result = self.find_all_symbols();
-        result
+        self.find_all_symbols()
             .iter()
             .filter(|(symbol, _point)| *symbol == '*')
             .map(|(_symbol, point)| *point)
@@ -55,8 +54,7 @@ impl Matrix {
     }
 
     fn get_gear_ratio(&self) -> usize {
-        let gears = self.get_gears();
-        gears
+        self.get_gears()
             .iter()
             .map(|point| self.get_adjacent_numbers(point))
             .filter(|vec| vec.len() == 2)
