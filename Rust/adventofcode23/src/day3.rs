@@ -142,7 +142,7 @@ impl Matrix {
 
         let watched_fields = watched_fields
             .into_iter()
-            .filter(|(x, y)| *x >= 0 && *x < len_col && *y >= 0 && *y < len_row)
+            .filter(|(x, y)| *x < len_col && *y < len_row)
             .map(|(x, y)| (x, y).into())
             .collect::<Vec<Point>>();
 

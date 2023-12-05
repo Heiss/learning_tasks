@@ -11,14 +11,18 @@ struct Card {
 
 impl Card {
     fn get_matching_numbers(&self) -> Vec<Number> {
-        self.numbers.iter().filter(|n| self.winning_numbers.contains(n)).map(|n| *n).collect::<Vec<Number>>()
+        self.numbers
+            .iter()
+            .filter(|n| self.winning_numbers.contains(n))
+            .map(|n| *n)
+            .collect::<Vec<Number>>()
     }
 
     fn get_points(&mut self) -> usize {
         if let Some(points) = self.points {
             return points;
         }
-        let mut winning_numbers = self.get_matching_numbers();
+        let winning_numbers = self.get_matching_numbers();
         if winning_numbers.len() == 0 {
             return 0;
         }
@@ -35,13 +39,25 @@ impl From<&str> for Card {
         let id = id.last().unwrap();
 
         let numbers = most_left_split[1].split(" | ").collect::<Vec<&str>>();
-        let winning_numbers = numbers[0].split(" ").filter(|&n| !n.is_empty()).collect::<Vec<&str>>();
-        let numbers = numbers[1].split(" ").filter(|&n| !n.is_empty()).collect::<Vec<&str>>();
+        let winning_numbers = numbers[0]
+            .split(" ")
+            .filter(|&n| !n.is_empty())
+            .collect::<Vec<&str>>();
+        let numbers = numbers[1]
+            .split(" ")
+            .filter(|&n| !n.is_empty())
+            .collect::<Vec<&str>>();
 
         Card {
             id: id.parse::<usize>().unwrap(),
-            winning_numbers: winning_numbers.iter().map(|n| n.parse::<usize>().unwrap()).collect::<Vec<usize>>(),
-            numbers: numbers.iter().map(|n| n.parse::<usize>().unwrap()).collect::<Vec<usize>>(),
+            winning_numbers: winning_numbers
+                .iter()
+                .map(|n| n.parse::<usize>().unwrap())
+                .collect::<Vec<usize>>(),
+            numbers: numbers
+                .iter()
+                .map(|n| n.parse::<usize>().unwrap())
+                .collect::<Vec<usize>>(),
             points: None,
         }
     }
@@ -50,7 +66,6 @@ impl From<&str> for Card {
 struct Cards(Vec<Card>);
 
 struct CopiedCards {
-    cards: Cards,
     copies: HashMap<usize, usize>,
 }
 
@@ -68,7 +83,11 @@ impl From<Vec<Card>> for Cards {
 
 impl From<&str> for Cards {
     fn from(value: &str) -> Self {
-        value.lines().map(|l| Card::from(l)).collect::<Vec<Card>>().into()
+        value
+            .lines()
+            .map(|l| Card::from(l))
+            .collect::<Vec<Card>>()
+            .into()
     }
 }
 
@@ -88,21 +107,16 @@ impl Cards {
             let id = card.id;
             let numbers = card.get_matching_numbers().len();
 
-            let current_card_count
-                = *copies.get(&id).unwrap_or(&0);
+            let current_card_count = *copies.get(&id).unwrap_or(&0);
             for copy_id in id + 1..=id + numbers {
                 let count = copies.entry(copy_id).or_insert(1);
                 *count += current_card_count;
             }
         }
 
-        CopiedCards {
-            cards: self,
-            copies,
-        }
+        CopiedCards { copies }
     }
 }
-
 
 fn part1(input: &str) -> usize {
     Cards::from(input).get_points()
