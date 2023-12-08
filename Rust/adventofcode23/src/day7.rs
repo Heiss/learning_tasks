@@ -64,7 +64,6 @@ impl FromStr for Card {
     }
 }
 
-
 type Bid = usize;
 
 #[derive(Debug)]
@@ -120,7 +119,7 @@ impl HandType {
                 3 => triples += 1,
                 4 => quadruples += 1,
                 5 => quintuples += 1,
-                _ => panic!("Invalid hand {}", count)
+                _ => panic!("Invalid hand {}", count),
             }
         }
         match (pairs, triples, quadruples, quintuples) {
@@ -209,10 +208,10 @@ impl FromStr for Hand {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let split = s.split_whitespace()
-            .collect::<Vec<&str>>();
+        let split = s.split_whitespace().collect::<Vec<&str>>();
 
-        let cards = split[0].chars()
+        let cards = split[0]
+            .chars()
             .map(|c| c.to_string().parse::<Card>().unwrap())
             .collect();
 
@@ -232,13 +231,11 @@ struct HandJoker(Hand);
 
 impl From<Hand> for HandJoker {
     fn from(hand: Hand) -> Self {
-        let mut cards = hand.cards.into_iter().map(|c|
-            if c == Card::Jack {
-                Card::Joker
-            } else {
-                c
-            }
-        ).collect::<Vec<Card>>();
+        let cards = hand
+            .cards
+            .into_iter()
+            .map(|c| if c == Card::Jack { Card::Joker } else { c })
+            .collect::<Vec<Card>>();
 
         let hand_type = HandType::from_cards_with_jokers(&cards);
 
@@ -285,7 +282,11 @@ struct Game {
 impl Game {
     fn get_total_winnings(&mut self) -> usize {
         self.hands.sort_unstable();
-        self.hands.iter().enumerate().map(|(i, hand)| (i + 1) * hand.bid).sum()
+        self.hands
+            .iter()
+            .enumerate()
+            .map(|(i, hand)| (i + 1) * hand.bid)
+            .sum()
     }
 }
 
@@ -317,7 +318,10 @@ impl FromStr for Game {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let hands = s.lines().map(|line| line.parse::<Hand>().unwrap()).collect();
+        let hands = s
+            .lines()
+            .map(|line| line.parse::<Hand>().unwrap())
+            .collect();
         Ok(Game { hands })
     }
 }
