@@ -53,7 +53,7 @@ impl<T> ValueMap<T> {
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone, Copy)]
 enum MappingType {
     SeedToSoil,
     SoilToFertilizer,
@@ -395,7 +395,7 @@ impl AlmanacRanges {
                         next_seed_ranges.push(seed_range.replace(unmoved));
                         next_seed_ranges.push(seed_range_next.replace(moved));
                     }
-                    UpdateRange::Unchanged => continue,
+                    UpdateRange::Unchanged => (),
                 }
             }
         }
@@ -405,16 +405,25 @@ impl AlmanacRanges {
     fn find_minimal_location(&mut self) -> Value {
         let seeds = std::mem::take(&mut self.seeds);
         let mappings = std::mem::take(&mut self.mappings);
-        let mut result_seeds = Vec::new();
 
-        for seed_range in seeds {
-            let mut next_seed_ranges = Self::update_ranges(seed_range, &mappings);
-            result_seeds.append(&mut next_seed_ranges);
-        }
+        std::thread::scope(move |s| {
+            let mut threads = Vec::new();
+            for seed_range in seeds {
+                let mapping_clone = mappings.clone();
+                let h1 = s.spawn(move || Self::update_ranges(seed_range, &mapping_clone));
+                threads.push(h1);
+            }
 
-        result_seeds
-            .iter()
-            .fold(usize::MAX, |acc, v| acc.min(v.start))
+            threads
+                .into_iter()
+                .map(|h| h.join().unwrap())
+                .fold(Vec::new(), |mut acc, mut v| {
+                    acc.append(&mut v);
+                    acc
+                })
+        })
+        .iter()
+        .fold(usize::MAX, |acc, v| acc.min(v.start))
     }
 }
 
@@ -473,9 +482,11 @@ fn part2(input: &str) -> usize {
 
 pub fn day() {
     let input = include_str!("../input/day5.txt");
-    print!("Day 5\t");
-    print!("Part 1: {}\t", part1(input));
-    println!("Part 2: {}", part2(input));
+    println!(
+        "Day 5\t Part 1: {}\t Part 2: {}",
+        part1(input),
+        part2(input)
+    );
 }
 
 #[cfg(test)]
