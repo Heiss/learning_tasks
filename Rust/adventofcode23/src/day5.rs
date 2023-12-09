@@ -480,7 +480,7 @@ fn part2(input: &str) -> usize {
     AlmanacRanges::new(almanac).find_minimal_location()
 }
 
-pub fn day() {
+pub fn _day() {
     let input = include_str!("../input/day5.txt");
     println!(
         "Day 5\t Part 1: {}\t Part 2: {}",

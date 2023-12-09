@@ -1,8 +1,8 @@
+use regex::Regex;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::str::FromStr;
 use std::sync::Mutex;
-use regex::Regex;
 
 #[derive(Debug)]
 struct Node {
@@ -20,7 +20,6 @@ impl Node {
         }
     }
 }
-
 
 #[derive(Debug)]
 enum Instruction {
@@ -54,24 +53,39 @@ impl FromStr for Map {
 
         for (root, left, right) in results {
             let name = root.to_string();
-            let node = parse_map.entry(name).or_insert(Rc::new(Mutex::new(Node::new(root)))).clone();
+            let node = parse_map
+                .entry(name)
+                .or_insert(Rc::new(Mutex::new(Node::new(root))))
+                .clone();
 
-            node.lock().map(|mut lock| {
-                let mut nodes = [left, right].map(|n| {
-                    parse_map.entry(n.to_string()).or_insert(Rc::new(Mutex::new(Node::new(n)))).clone()
-                }).map(Some).into_iter().collect::<Vec<_>>();
+            node.lock()
+                .map(|mut lock| {
+                    let mut nodes = [left, right]
+                        .map(|n| {
+                            parse_map
+                                .entry(n.to_string())
+                                .or_insert(Rc::new(Mutex::new(Node::new(n))))
+                                .clone()
+                        })
+                        .map(Some)
+                        .into_iter()
+                        .collect::<Vec<_>>();
 
-                lock.right = nodes.pop().unwrap();
-                lock.left = nodes.pop().unwrap();
-            }).unwrap();
+                    lock.right = nodes.pop().unwrap();
+                    lock.left = nodes.pop().unwrap();
+                })
+                .unwrap();
         }
 
         Ok(Self {
-            instructions: instructions.chars().map(|c| match c {
-                'L' => Instruction::Left,
-                'R' => Instruction::Right,
-                _ => panic!("Invalid instruction"),
-            }).collect(),
+            instructions: instructions
+                .chars()
+                .map(|c| match c {
+                    'L' => Instruction::Left,
+                    'R' => Instruction::Right,
+                    _ => panic!("Invalid instruction"),
+                })
+                .collect(),
             map: parse_map,
         })
     }
@@ -85,8 +99,16 @@ impl Map {
             current = {
                 let current_lock = current.lock().unwrap();
                 let next = match instruction {
-                    Instruction::Left => current_lock.left.as_ref().expect("Left must be there").clone(),
-                    Instruction::Right => current_lock.right.as_ref().expect("Right must be there").clone()
+                    Instruction::Left => current_lock
+                        .left
+                        .as_ref()
+                        .expect("Left must be there")
+                        .clone(),
+                    Instruction::Right => current_lock
+                        .right
+                        .as_ref()
+                        .expect("Right must be there")
+                        .clone(),
                 };
                 if current_lock.name == "ZZZ" {
                     return steps;
@@ -99,13 +121,17 @@ impl Map {
     }
 
     fn count_steps_as_ghost(&self) -> usize {
-        let mut current: Vec<_> = self.map.iter().filter_map(|(k, v)| {
-            if k.chars().collect::<Vec<char>>().pop().unwrap() == 'A' {
-                Some(v.clone())
-            } else {
-                None
-            }
-        }).collect();
+        let current: Vec<_> = self
+            .map
+            .iter()
+            .filter_map(|(k, v)| {
+                if k.chars().collect::<Vec<char>>().pop().unwrap() == 'A' {
+                    Some(v.clone())
+                } else {
+                    None
+                }
+            })
+            .collect();
         let mut loops = Vec::new();
 
         for node in current.into_iter() {
@@ -122,8 +148,12 @@ impl Map {
                     }
 
                     match instruction {
-                        Instruction::Left => lock.left.as_ref().expect("Left must be there").clone(),
-                        Instruction::Right => lock.right.as_ref().expect("Right must be there").clone()
+                        Instruction::Left => {
+                            lock.left.as_ref().expect("Left must be there").clone()
+                        }
+                        Instruction::Right => {
+                            lock.right.as_ref().expect("Right must be there").clone()
+                        }
                     }
                 };
                 steps += 1;
@@ -185,7 +215,9 @@ mod tests {
 
     #[test]
     fn test_part1() {
-        assert_eq!(part1(r#"RL
+        assert_eq!(
+            part1(
+                r#"RL
 
 AAA = (BBB, CCC)
 BBB = (DDD, EEE)
@@ -193,17 +225,27 @@ CCC = (ZZZ, GGG)
 DDD = (DDD, DDD)
 EEE = (EEE, EEE)
 GGG = (GGG, GGG)
-ZZZ = (ZZZ, ZZZ)"#), 2);
-        assert_eq!(part1(r#"LLR
+ZZZ = (ZZZ, ZZZ)"#
+            ),
+            2
+        );
+        assert_eq!(
+            part1(
+                r#"LLR
 
 AAA = (BBB, BBB)
 BBB = (AAA, ZZZ)
-ZZZ = (ZZZ, ZZZ)"#), 6);
+ZZZ = (ZZZ, ZZZ)"#
+            ),
+            6
+        );
     }
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2(r#"LR
+        assert_eq!(
+            part2(
+                r#"LR
 
 11A = (11B, XXX)
 11B = (XXX, 11Z)
@@ -212,6 +254,9 @@ ZZZ = (ZZZ, ZZZ)"#), 6);
 22B = (22C, 22C)
 22C = (22Z, 22Z)
 22Z = (22B, 22B)
-XXX = (XXX, XXX)"#), 6);
+XXX = (XXX, XXX)"#
+            ),
+            6
+        );
     }
 }

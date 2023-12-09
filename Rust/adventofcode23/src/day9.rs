@@ -77,17 +77,12 @@ impl Sensor {
 
         let mut current = 0;
 
-        self.histories
-            .iter_mut()
-            .map(|mut h| {
-                while let Some(mut v) = h.differences.pop() {
-                    current += v.pop().unwrap().0;
-                }
-                current
-            })
-            .map(|v| v)
-            .last()
-            .unwrap()
+        self.histories.iter_mut().for_each(|h| {
+            while let Some(mut v) = h.differences.pop() {
+                current += v.pop().unwrap().0;
+            }
+        });
+        current
     }
 
     fn get_previous_value_sum(&mut self) -> isize {
