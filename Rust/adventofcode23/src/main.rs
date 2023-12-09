@@ -8,6 +8,7 @@ mod day5;
 mod day6;
 mod day7;
 mod day8;
+mod day9;
 
 fn main() {
     let vec = vec![
@@ -19,12 +20,13 @@ fn main() {
         day6::day,
         day7::day,
         day8::day,
+        day9::day,
     ];
     std::thread::scope(|s| {
         vec.iter()
             .map(|f| (Instant::now(), s.spawn(|| f())))
             .for_each(|(t, h)| {
-                h.join().unwrap();
+                h.join().expect("Thread");
                 println!("Time: {:?}", t.elapsed());
             });
     });
