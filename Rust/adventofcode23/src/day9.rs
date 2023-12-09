@@ -75,14 +75,11 @@ impl Sensor {
     fn get_next_value_sum(&mut self) -> isize {
         self.histories.iter_mut().for_each(|h| h.generate_diff());
 
-        let mut current = 0;
-
-        self.histories.iter_mut().for_each(|h| {
-            while let Some(mut v) = h.differences.pop() {
-                current += v.pop().unwrap().0;
-            }
-        });
-        current
+        self.histories
+            .iter_mut()
+            .flat_map(|h| &mut h.differences)
+            .map(|v| v.pop().unwrap().0)
+            .sum()
     }
 
     fn get_previous_value_sum(&mut self) -> isize {
