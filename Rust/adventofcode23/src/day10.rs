@@ -279,7 +279,10 @@ impl Map {
             .all(|w| w[0].current_point != w[1].current_point)
         {
             steps += 1;
-            iterators = iterators.into_iter().filter_map(|mut i| i.next()).collect();
+            iterators = iterators
+                .into_iter()
+                .filter_map(|mut i| i.next().map(|_| i))
+                .collect();
             assert!(iterators.len() >= 2);
         }
 
