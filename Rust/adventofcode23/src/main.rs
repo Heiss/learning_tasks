@@ -2,6 +2,7 @@ use std::time::Instant;
 
 mod day1;
 mod day10;
+mod day11;
 mod day2;
 mod day3;
 mod day4;
@@ -23,6 +24,7 @@ fn main() {
         day8::day,
         day9::day,
         day10::day,
+        day11::day,
     ];
     std::thread::scope(|s| {
         vec.iter()
