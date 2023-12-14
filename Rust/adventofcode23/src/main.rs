@@ -13,6 +13,7 @@ mod day7;
 mod day8;
 mod day9;
 mod day13;
+mod day14;
 
 fn main() {
     let vec = vec![
@@ -29,6 +30,7 @@ fn main() {
         day11::day,
         //day12::day,
         day13::day,
+        day14::day,
     ];
     std::thread::scope(|s| {
         vec.iter()
