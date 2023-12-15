@@ -95,25 +95,27 @@ impl<'a> LensOperation<'a> {
 
 
 fn part1(input: &str) -> usize {
-    let mut iter = HashIter::new(input, ",");
+    let iter = HashIter::new(input, ",");
     iter.into_iter().map(|v| calc_hash(v) as usize).sum()
 }
 
 fn part2(input: &str) -> usize {
-    let mut iter = HashIter::new(input, ",");
+    let iter = HashIter::new(input, ",");
     let mut boxes: [Vec<Lens>; 256] = vec![Vec::new(); 256].try_into().unwrap();
 
     for op in iter.into_iter().map(LensOperation::from_str) {
         match op {
             LensOperation::Insert(position, lens) => {
-                if let Some(l) = boxes[position as usize].iter_mut().find(|l| l == &&lens.label) {
+                let position = position as usize;
+                if let Some(l) = boxes[position].iter_mut().find(|l| l == &&lens.label) {
                     l.focal_length = lens.focal_length;
                 } else {
-                    boxes[position as usize].push(lens);
+                    boxes[position].push(lens);
                 };
             }
             LensOperation::Remove(position, label) => {
-                boxes[position as usize].retain(|lens| *lens != label);
+                let position = position as usize;
+                boxes[position].retain(|lens| *lens != label);
             }
         }
     }

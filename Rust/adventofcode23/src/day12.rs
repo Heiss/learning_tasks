@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
 use std::mem::MaybeUninit;
@@ -180,7 +182,7 @@ impl FromStr for Springs {
         let mut groups = Vec::new();
         for line in s.lines() {
             let mut parts = line.split_whitespace();
-            let mut pattern: Vec<_> = parts
+            let pattern: Vec<_> = parts
                 .next()
                 .unwrap()
                 .chars()
