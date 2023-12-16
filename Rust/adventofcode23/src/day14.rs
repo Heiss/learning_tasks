@@ -17,7 +17,7 @@ impl FromStr for Field {
             "." => Ok(Field::Empty),
             "#" => Ok(Field::CubeRock),
             "O" => Ok(Field::RoundedRock),
-            _ => panic!("Invalid field: {}", s)
+            _ => panic!("Invalid field: {}", s),
         }
     }
 }
@@ -140,7 +140,7 @@ pub fn day() {
     let input = include_str!("../input/day14.txt");
     print!("day 14\t");
     print!("part 1: {}\t", part1(input));
-    println!("part 2: {}", part2(input));
+    print!("Part 2: {}", part2(input));
 }
 
 #[cfg(test)]

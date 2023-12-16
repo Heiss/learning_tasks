@@ -14,7 +14,7 @@ impl FromStr for FieldState {
         match s {
             "#" => Ok(FieldState::Rock),
             "." => Ok(FieldState::Ash),
-            _ => panic!("Unknown field state: {}", s)
+            _ => panic!("Unknown field state: {}", s),
         }
     }
 }
@@ -50,7 +50,10 @@ struct MirrorMap {
 
 impl Debug for MirrorMap {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        MapSlice { fields: self.fields.clone() }.fmt(f)
+        MapSlice {
+            fields: self.fields.clone(),
+        }
+        .fmt(f)
     }
 }
 
@@ -91,7 +94,6 @@ impl MirrorMap {
         }
         unequal_fields == smudges
     }
-
 
     fn find_smudge_reflection(&mut self, smudges: usize) -> (Option<Row>, Option<Column>) {
         let mut row_index = None;
@@ -140,9 +142,7 @@ impl FromStr for MirrorMap {
             rows.push(columns);
         }
 
-        Ok(MirrorMap {
-            fields: rows
-        })
+        Ok(MirrorMap { fields: rows })
     }
 }
 
@@ -165,12 +165,15 @@ impl FromStr for MirrorMaps {
 
 impl MirrorMaps {
     fn count_smudge_reflections(&mut self, smudges: usize) -> usize {
-        self.maps.iter_mut().filter_map(|m| match m.find_smudge_reflection(smudges) {
-            (Some(l), Some(r)) => Some(l * 100 + r),
-            (Some(v), None) => Some(v * 100),
-            (None, Some(v)) => Some(v),
-            _ => None
-        }).sum()
+        self.maps
+            .iter_mut()
+            .filter_map(|m| match m.find_smudge_reflection(smudges) {
+                (Some(l), Some(r)) => Some(l * 100 + r),
+                (Some(v), None) => Some(v * 100),
+                (None, Some(v)) => Some(v),
+                _ => None,
+            })
+            .sum()
     }
 }
 
@@ -188,7 +191,7 @@ pub fn day() {
     let input = include_str!("../input/day13.txt");
     print!("day 13\t");
     print!("part 1: {}\t", part1(input));
-    println!("part 2: {}", part2(input));
+    print!("Part 2: {}", part2(input));
 }
 
 #[cfg(test)]
