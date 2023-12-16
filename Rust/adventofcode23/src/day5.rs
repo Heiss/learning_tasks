@@ -483,11 +483,9 @@ fn part2(input: &str) -> usize {
 #[allow(dead_code)]
 pub fn day() {
     let input = include_str!("../input/day5.txt");
-    println!(
-        "Day 5\t Part 1: {}\t Part 2: {}",
-        part1(input),
-        part2(input)
-    );
+    print!("Day 5\t");
+    print!("Part 1: {}\t", part1(input));
+    print!("Part 2: {}", part2(input));
 }
 
 #[cfg(test)]

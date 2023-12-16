@@ -82,7 +82,13 @@ impl<'a> LensOperation<'a> {
             let focal = focal.parse().unwrap();
             let position = calc_hash(label) as BoxPosition;
 
-            return Self::Insert(position, Lens { label, focal_length: focal });
+            return Self::Insert(
+                position,
+                Lens {
+                    label,
+                    focal_length: focal,
+                },
+            );
         } else if let Some((label, _)) = input.split_once('-') {
             let position = calc_hash(label) as BoxPosition;
 
@@ -92,7 +98,6 @@ impl<'a> LensOperation<'a> {
         }
     }
 }
-
 
 fn part1(input: &str) -> usize {
     let iter = HashIter::new(input, ",");
@@ -120,16 +125,24 @@ fn part2(input: &str) -> usize {
         }
     }
 
-    boxes.iter().enumerate().flat_map(|(box_pos, bx)| bx.iter().enumerate().map(move |(lens_pos, lens)| {
-        vec![box_pos + 1, lens_pos + 1, lens.focal_length as usize].iter().product::<usize>()
-    })).sum()
+    boxes
+        .iter()
+        .enumerate()
+        .flat_map(|(box_pos, bx)| {
+            bx.iter().enumerate().map(move |(lens_pos, lens)| {
+                vec![box_pos + 1, lens_pos + 1, lens.focal_length as usize]
+                    .iter()
+                    .product::<usize>()
+            })
+        })
+        .sum()
 }
 
 pub fn day() {
     let input = include_str!("../input/day15.txt");
     print!("day 15\t");
     print!("part 1: {}\t", part1(input));
-    println!("part 2: {}", part2(input));
+    print!("Part 2: {}", part2(input));
 }
 
 #[cfg(test)]

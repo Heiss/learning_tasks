@@ -22,7 +22,10 @@ impl Race {
         let down_border = (time - right) / 2.0;
         let upper_border = (time + right) / 2.0;
 
-        ((down_border + 1.0).floor() as usize, (upper_border - 1.0).ceil() as usize)
+        (
+            (down_border + 1.0).floor() as usize,
+            (upper_border - 1.0).ceil() as usize,
+        )
     }
 
     fn get_count_solutions(&self) -> usize {
@@ -36,7 +39,10 @@ struct Races(Vec<Race>);
 
 impl Races {
     fn get_number_of_solutions(&self) -> usize {
-        self.0.iter().map(|r| r.get_count_solutions()).fold(1, |acc, x| acc * x)
+        self.0
+            .iter()
+            .map(|r| r.get_count_solutions())
+            .fold(1, |acc, x| acc * x)
     }
 }
 
@@ -48,7 +54,12 @@ impl FromStr for Races {
         let times = lines[0].split_whitespace().skip(1);
         let distances = lines[1].split_whitespace().skip(1);
 
-        Ok(Self(times.zip(distances).map(|(t, d)| Race::from_str(t, d)).collect()))
+        Ok(Self(
+            times
+                .zip(distances)
+                .map(|(t, d)| Race::from_str(t, d))
+                .collect(),
+        ))
     }
 }
 
@@ -68,7 +79,7 @@ pub fn day() {
     let input = include_str!("../input/day6.txt");
     print!("Day 6\t");
     print!("Part 1: {}\t", part1(input));
-    println!("Part 2: {}", part2(input));
+    print!("Part 2: {}", part2(input));
 }
 
 #[cfg(test)]

@@ -109,7 +109,7 @@ pub fn day() {
     let input = include_str!("../input/day9.txt");
     print!("Day 9\t");
     print!("Part 1: {}\t", part1(input));
-    println!("Part 2: {}", part2(input));
+    print!("Part 2: {}", part2(input));
 }
 
 #[cfg(test)]
