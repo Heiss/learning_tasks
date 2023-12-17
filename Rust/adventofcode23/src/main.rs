@@ -19,31 +19,44 @@ mod day8;
 mod day9;
 
 fn main() {
+    let t = Instant::now();
     let vec = vec![
         day1::day,
         day2::day,
         day3::day,
         day4::day,
-        //day5::day,
+        day5::day,
         day6::day,
         day7::day,
         day8::day,
         day9::day,
         day10::day,
         day11::day,
-        //day12::day,
+        day12::day,
         day13::day,
         day14::day,
         day15::day,
-        //day16::day,
+        day16::day,
         day17::day,
     ];
     std::thread::scope(|s| {
-        let ts: Vec<_> = vec.iter().map(|f| s.spawn(|| f())).collect();
+        let ts: Vec<_> = vec
+            .iter()
+            .map(|f| {
+                s.spawn(|| {
+                    let t = Instant::now();
+                    let res = f();
+                    (t.elapsed(), res)
+                })
+            })
+            .collect();
         ts.into_iter().for_each(|h| {
-            let t = Instant::now();
-            let r = h.join().expect("Thread");
-            println!("{}\tTime: {:?}", r, t.elapsed());
+            let (t, r) = h.join().expect("Thread");
+            println!("{}\tTime: {:?}", r, t);
         });
     });
+    println!(
+        "-----------------------------------------------\nTotal time: {:?}",
+        t.elapsed()
+    );
 }

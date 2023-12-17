@@ -106,7 +106,6 @@ impl Field {
                     position: b.position.add_direction(&b.direction),
                     direction: b.direction,
                 }),
-            _ => panic!("invalid encounter Field {self:?} Beam {b:?}"),
         }
 
         beams
@@ -344,8 +343,8 @@ fn part1(input: &str) -> usize {
 }
 
 fn part2(input: &str) -> usize {
-    let mut grid = Grid::from_str(input).unwrap();
-    let energized_fields: HashMap<Beam, usize> = HashMap::new();
+    let grid = Grid::from_str(input).unwrap();
+    let _energized_fields: HashMap<Beam, usize> = HashMap::new();
 
     let left = (0..grid.fields.len()).map(|i| Beam {
         position: Point::new(0, i as isize),
