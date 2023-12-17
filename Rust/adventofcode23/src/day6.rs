@@ -75,11 +75,9 @@ fn part2(input: &str) -> usize {
     races.get_number_of_solutions()
 }
 
-pub fn day() {
+pub fn day() -> String {
     let input = include_str!("../input/day6.txt");
-    print!("Day 6\t");
-    print!("Part 1: {}\t", part1(input));
-    print!("Part 2: {}", part2(input));
+    format!("Day 6\tPart 1: {}\tPart 2: {}", part1(input), part2(input))
 }
 
 #[cfg(test)]

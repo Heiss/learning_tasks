@@ -213,11 +213,9 @@ fn part2(input: &str) -> usize {
     springs.get_solutions_count()
 }
 
-pub fn day() {
+pub fn day() -> String {
     let input = include_str!("../input/day12.txt");
-    print!("day 12\t");
-    print!("part 1: {}\t", part1(input));
-    print!("Part 2: {}", part2(input));
+    format!("Day 12\tPart 1: {}\tPart 2: {}", part1(input), part2(input))
 }
 
 #[cfg(test)]

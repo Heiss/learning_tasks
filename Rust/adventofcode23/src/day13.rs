@@ -187,11 +187,9 @@ fn part2(input: &str) -> usize {
     maps.count_smudge_reflections(1)
 }
 
-pub fn day() {
+pub fn day() -> String {
     let input = include_str!("../input/day13.txt");
-    print!("day 13\t");
-    print!("part 1: {}\t", part1(input));
-    print!("Part 2: {}", part2(input));
+    format!("Day 13\tPart 1: {}\tPart 2: {}", part1(input), part2(input))
 }
 
 #[cfg(test)]

@@ -37,11 +37,11 @@ fn main() {
         //day16::day,
     ];
     std::thread::scope(|s| {
-        vec.iter()
-            .map(|f| (Instant::now(), s.spawn(|| f())))
-            .for_each(|(t, h)| {
-                h.join().expect("Thread");
-                println!("\tTime: {:?}", t.elapsed());
-            });
+        let ts: Vec<_> = vec.iter().map(|f| s.spawn(|| f())).collect();
+        ts.into_iter().for_each(|h| {
+            let t = Instant::now();
+            let r = h.join().expect("Thread");
+            println!("{}\tTime: {:?}", r, t.elapsed());
+        });
     });
 }
