@@ -218,8 +218,6 @@ impl From<Step> for VisitedKey {
     }
 }
 
-type DistancePath = Option<Step>;
-
 struct Crucible<'a> {
     grid: &'a Grid,
 }
@@ -287,7 +285,7 @@ impl<'a> Crucible<'a> {
                     Step::new(next_pos, dir, next_step_in_same_direction, next_distance);
 
                 let dist_key = next_step.clone().into();
-                let mut d = distances.get_mut(&dist_key);
+                let d = distances.get_mut(&dist_key);
                 if next_distance < d.as_ref().map(|s| **s).unwrap_or(usize::MAX) {
                     if distances.insert(dist_key, next_distance).is_none() {
                         queue.push(next_step.clone());
@@ -301,11 +299,7 @@ impl<'a> Crucible<'a> {
 
     fn get_minimum_distance(&mut self, p: &Point, Range { start, end }: Range<usize>) -> usize {
         let distances = self.calculates_distances(Point { x: 0, y: 0 }, p.clone(), start, end);
-
-        let mut s = distances.unwrap();
-        let res = s.distance;
-
-        res
+        distances.unwrap().distance
     }
 }
 
