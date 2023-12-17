@@ -415,11 +415,9 @@ fn part2(input: &str) -> usize {
     map.count_enclosed_tiles()
 }
 
-pub fn day() {
+pub fn day() -> String {
     let input = include_str!("../input/day10.txt");
-    print!("Day 10\t");
-    print!("Part 1: {}\t", part1(input));
-    print!("Part 2: {}", part2(input));
+    format!("Day 10\tPart 1: {}\tPart 2: {}", part1(input), part2(input))
 }
 
 #[cfg(test)]

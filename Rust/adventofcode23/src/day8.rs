@@ -202,11 +202,9 @@ fn part2(input: &str) -> usize {
     map.count_steps_as_ghost()
 }
 
-pub fn day() {
+pub fn day() -> String {
     let input = include_str!("../input/day8.txt");
-    print!("Day 8\t");
-    print!("Part 1: {}\t", part1(input));
-    print!("Part 2: {}", part2(input));
+    format!("Day 8\tPart 1: {}\tPart 2: {}", part1(input), part2(input))
 }
 
 #[cfg(test)]

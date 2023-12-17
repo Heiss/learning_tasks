@@ -178,12 +178,10 @@ fn part2(input: &str) -> usize {
     matrix.get_gear_ratio()
 }
 
-pub fn day() {
+pub fn day() -> String {
     let input = include_str!("../input/day3.txt");
 
-    print!("Day 3\t");
-    print!("Part 1: {}\t", part1(input));
-    print!("Part 2: {}", part2(input));
+    format!("Day 3\tPart 1: {}\tPart 2: {}", part1(input), part2(input))
 }
 
 #[cfg(test)]

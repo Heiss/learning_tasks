@@ -107,11 +107,9 @@ fn part2(input: &str) -> usize {
     observation.expand(1_000_000).calculate_distances_sum()
 }
 
-pub fn day() {
+pub fn day() -> String {
     let input = include_str!("../input/day11.txt");
-    print!("day 11\t");
-    print!("part 1: {}\t", part1(input));
-    print!("Part 2: {}", part2(input));
+    format!("Day 11\tPart 1: {}\tPart 2: {}", part1(input), part2(input))
 }
 
 #[cfg(test)]

@@ -79,11 +79,9 @@ fn part2(input: &str) -> usize {
     calibration_value.part2()
 }
 
-pub fn day() {
+pub fn day() -> String {
     let input = include_str!("../input/day1.txt");
-    print!("Day 1\t");
-    print!("Part 1: {}\t", part1(input));
-    print!("Part 2: {}", part2(input));
+    format!("Day 1\tPart 1: {}\t Part 2: {}", part1(input), part2(input))
 }
 
 #[cfg(test)]

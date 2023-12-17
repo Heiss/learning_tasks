@@ -109,11 +109,9 @@ fn part2(input: &str) -> usize {
     games.calculate_power_sum()
 }
 
-pub fn day() {
+pub fn day() -> String {
     let input = include_str!("../input/day2.txt");
-    print!("Day 2\t");
-    print!("Part 1: {}\t", part1(input));
-    print!("Part 2: {}", part2(input));
+    format!("Day 2\tPart 1: {}\t Part 2: {}", part1(input), part2(input))
 }
 
 #[cfg(test)]
