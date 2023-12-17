@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Formatter};
 use std::str::FromStr;

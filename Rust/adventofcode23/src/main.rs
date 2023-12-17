@@ -8,6 +8,7 @@ mod day13;
 mod day14;
 mod day15;
 mod day16;
+mod day17;
 mod day2;
 mod day3;
 mod day4;
@@ -35,6 +36,7 @@ fn main() {
         day14::day,
         day15::day,
         //day16::day,
+        day17::day,
     ];
     std::thread::scope(|s| {
         let ts: Vec<_> = vec.iter().map(|f| s.spawn(|| f())).collect();
