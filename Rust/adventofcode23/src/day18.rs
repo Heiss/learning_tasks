@@ -2,43 +2,20 @@ use std::fmt::{Debug, Formatter};
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
-struct RGB {
-    r: u8,
-    g: u8,
-    b: u8,
-}
-
-impl FromStr for RGB {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        use regex::Regex;
-
-        let re = Regex::new(r"#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})").unwrap();
-        let caps = re.captures(s).unwrap();
-        let r = u8::from_str_radix(&caps[1], 16).unwrap();
-        let g = u8::from_str_radix(&caps[2], 16).unwrap();
-        let b = u8::from_str_radix(&caps[3], 16).unwrap();
-        Ok(RGB { r, g, b })
-    }
-}
-
-#[derive(Debug, PartialEq, Clone, Copy)]
 enum Field {
-    DigOut(RGB),
+    DigOut,
     Dirt,
 }
 
-
+#[derive(Debug, PartialEq, Clone)]
 struct Plan {
     dir: Direction,
     steps: usize,
-    rgb: RGB,
 }
 
 impl Plan {
-    fn new(dir: Direction, steps: usize, rgb: RGB) -> Self {
-        Plan { dir, steps, rgb }
+    fn new(dir: Direction, steps: usize) -> Self {
+        Plan { dir, steps }
     }
 }
 
@@ -48,6 +25,18 @@ enum Direction {
     Down,
     Left,
     Right,
+}
+
+impl Direction {
+    fn from_num(p0: &str) -> Self {
+        match p0 {
+            "0" => Direction::Right,
+            "1" => Direction::Down,
+            "2" => Direction::Left,
+            "3" => Direction::Up,
+            _ => panic!("Invalid direction {}", p0),
+        }
+    }
 }
 
 impl Direction {
@@ -69,11 +58,6 @@ impl Direction {
             Direction::Right => Point::new(1, 0),
         }
     }
-
-    fn add(&self, p: Point) -> Point {
-        let dir = self.to_point();
-        Point::new(p.x + dir.x, p.y + dir.y)
-    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -86,25 +70,35 @@ impl Point {
     fn new(x: isize, y: isize) -> Self {
         Point { x, y }
     }
+
+    fn add(&self, p: Point) -> Point {
+        Point::new(self.x + p.x, self.y + p.y)
+    }
+
+    fn add_plan(&self, plan: &Plan) -> Point {
+        let dir = plan.dir.to_point();
+        Point::new(
+            self.x + dir.x * plan.steps as isize,
+            self.y + dir.y * plan.steps as isize,
+        )
+    }
 }
 
 #[derive(PartialEq, Clone)]
 struct Grid {
-    fields: Vec<Vec<Field>>,
+    plans: Vec<Plan>,
 }
 
-impl Debug for Grid {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        for row in &self.fields {
-            for field in row {
-                match field {
-                    Field::Dirt => write!(f, ".")?,
-                    Field::DigOut(rgb) => write!(f, "#")?,
-                }
+#[allow(dead_code)]
+fn print_fields(fields: &Vec<Vec<Field>>) {
+    for row in fields {
+        for field in row {
+            match field {
+                Field::Dirt => print!("."),
+                Field::DigOut => print!("#"),
             }
-            writeln!(f)?;
         }
-        Ok(())
+        println!();
     }
 }
 
@@ -117,16 +111,21 @@ impl FromStr for Grid {
             let mut plan = line.split_whitespace().collect::<Vec<_>>();
             let dir = Direction::from_str(plan[0]);
             let steps = plan[1].parse().unwrap();
-            let rgb = RGB::from_str(plan[2]).unwrap();
-            plans.push(Plan::new(dir, steps, rgb));
+            plans.push(Plan::new(dir, steps));
         }
 
+        Ok(Grid { plans })
+    }
+}
+
+impl Grid {
+    fn get_fields(&self) -> Vec<Vec<Field>> {
         let mut pos = Point::new(0, 0);
 
         let mut possitions = Vec::new();
-        for plan in plans {
+        for plan in &self.plans {
             for _ in 0..plan.steps {
-                pos = plan.dir.add(pos);
+                pos = pos.add(plan.dir.to_point());
                 possitions.push(pos.clone());
             }
         }
@@ -136,20 +135,44 @@ impl FromStr for Grid {
         let find_min_y = possitions.iter().map(|p| p.y).min().unwrap();
         let find_max_y = possitions.iter().map(|p| p.y).max().unwrap();
 
-        println!("{} {} {} {}", find_min_x, find_max_x, find_min_y, find_max_y);
-        let mut fields = vec![vec![Field::Dirt; (find_max_x - find_min_x) as usize + 1]; (find_max_y - find_min_y) as usize + 1];
+        let mut fields = vec![
+            vec![Field::Dirt; (find_max_x - find_min_x) as usize + 1];
+            (find_max_y - find_min_y) as usize + 1
+        ];
 
         for pos in possitions {
             let x = pos.x - find_min_x;
             let y = pos.y - find_min_y;
-            fields[y as usize][x as usize] = Field::DigOut(RGB { r: 0, g: 0, b: 0 });
+            fields[y as usize][x as usize] = Field::DigOut;
         }
 
-        Ok(Grid { fields })
+        fields
     }
-}
 
-impl Grid {
+    fn from_hex_str(s: &str) -> Self {
+        use regex::Regex;
+
+        let mut plans = Vec::new();
+        let re = Regex::new(r"^[URDL] \d+ \(#([a-f0-9]{5})(\d)\)$").unwrap();
+
+        for line in s.lines() {
+            let cap = re.captures_iter(line).next();
+
+            let cap = if cap.is_none() {
+                panic!("Invalid input {}", line);
+            } else {
+                cap.unwrap()
+            };
+
+            let steps = usize::from_str_radix(&cap[1], 16).unwrap();
+            let dir = Direction::from_num(&cap[2]);
+
+            plans.push(Plan::new(dir, steps));
+        }
+
+        Grid { plans }
+    }
+
     /// Count the number of inner dirt fields.
     /// Here it is done through a pixel by pixel search.
     ///
@@ -158,74 +181,95 @@ impl Grid {
     /// It goes to the next field and checks for a digout field. If up and down are digout fields too, it checks if the directions are the same.
     /// If the direction changes, all next dirt fields in row are inside and should be counted.
     fn count_inner_dirt_pixel(&self) -> usize {
-        let mut count = 0;
-        let mut grid = self.clone();
+        let mut grid_fields = self.get_fields();
+        let fields = grid_fields.clone();
 
-        for y in 1..self.fields.len() - 1 {
+        for y in 1..fields.len() - 1 {
             let mut inner = false;
             let mut dir = None;
-            for x in 0..self.fields[y].len() {
-                match self.fields[y][x] {
+            for x in 0..fields[y].len() {
+                match fields[y][x] {
                     Field::Dirt => {
                         if inner {
-                            grid.fields[y][x] = Field::DigOut(RGB { r: 0, g: 0, b: 0 });
+                            grid_fields[y][x] = Field::DigOut;
                         }
-                        count += inner as usize;
                         dir = None;
                     }
-                    Field::DigOut(_) => {
-                        let up = self.fields.get(y - 1).map(|row| row[x]);
-                        let down = self.fields.get(y + 1).map(|row| row[x]);
+                    Field::DigOut => {
+                        let up = fields.get(y - 1).map(|row| row[x]);
+                        let down = fields.get(y + 1).map(|row| row[x]);
 
                         match (up, down) {
-                            (Some(Field::DigOut(_)), Some(Field::DigOut(_))) => {
-                                inner = !inner
-                            }
-                            (Some(Field::DigOut(_)), _) => {
+                            (Some(Field::DigOut), Some(Field::DigOut)) => inner = !inner,
+                            (Some(Field::DigOut), _) => {
                                 if dir == Some(Direction::Down) {
                                     inner = !inner;
                                 } else {
                                     dir = Some(Direction::Up);
                                 }
                             }
-                            (_, Some(Field::DigOut(_))) => {
+                            (_, Some(Field::DigOut)) => {
                                 if dir == Some(Direction::Up) {
                                     inner = !inner;
                                 } else {
                                     dir = Some(Direction::Down);
                                 }
                             }
-                            (None, None) | (None, Some(Field::Dirt)) | (Some(Field::Dirt), Some(Field::Dirt)) | (Some(Field::Dirt), None) => {}
+                            (None, None)
+                            | (None, Some(Field::Dirt))
+                            | (Some(Field::Dirt), Some(Field::Dirt))
+                            | (Some(Field::Dirt), None) => {}
                         }
                     }
                 }
             }
         }
-        println!("{:?}", grid);
+        //print_fields(&grid_fields);
 
-        grid.fields.iter().flat_map(|row| row.iter()).filter(|f| {
-            match f {
-                Field::DigOut(_) => true,
+        grid_fields
+            .iter()
+            .flat_map(|row| row.iter())
+            .filter(|f| match f {
+                Field::DigOut => true,
                 _ => false,
-            }
-        }).count()
+            })
+            .count()
     }
 
     /// Count the number of inner dirt fields.
-    /// Here it is done through a flood fill search.
-    fn count_inner_dirt_flood(&self) -> usize {
-        0
+    /// Here it is done through a shoelace algorithm and respects picks theorem.
+    ///
+    /// https://www.themathdoctors.org/polygon-coordinates-and-areas/
+    fn count_inner_dirt_with_shoelace(&self) -> usize {
+        let plans = self.plans.clone();
+
+        let mut previous_point;
+        let mut current_point = Point { x: 0, y: 0 };
+
+        let mut count_points_on_boundary = 0;
+        let mut area_interior = 0;
+
+        for plan in &plans {
+            previous_point = current_point;
+            current_point = current_point.add_plan(plan);
+
+            count_points_on_boundary += plan.steps;
+            area_interior +=
+                previous_point.x * current_point.y - current_point.x * previous_point.y;
+        }
+
+        count_points_on_boundary / 2 + area_interior.abs() as usize / 2 + 1
     }
 }
 
 fn part1(input: &str) -> usize {
     let grid = Grid::from_str(input).unwrap();
-    println!("{:?}", grid);
     grid.count_inner_dirt_pixel()
 }
 
 fn part2(input: &str) -> usize {
-    0
+    let grid = Grid::from_hex_str(input);
+    grid.count_inner_dirt_with_shoelace()
 }
 
 pub fn day() -> String {
@@ -259,6 +303,6 @@ U 2 (#7a21e3)"#;
 
     #[test]
     fn test_part2() {
-        assert_eq!(part2(INPUT), 0);
+        assert_eq!(part2(INPUT), 952408144115);
     }
 }

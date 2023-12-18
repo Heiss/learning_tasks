@@ -9,6 +9,7 @@ mod day14;
 mod day15;
 mod day16;
 mod day17;
+mod day18;
 mod day2;
 mod day3;
 mod day4;
@@ -17,11 +18,14 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
-mod day18;
 
 fn main() {
+    use std::env;
+    let args: Vec<String> = env::args().collect();
+
     let t = Instant::now();
-    let vec = vec![
+
+    let mut vec = vec![
         day1::day,
         day2::day,
         day3::day,
@@ -41,6 +45,11 @@ fn main() {
         day17::day,
         day18::day,
     ];
+    if let Ok(v) = args[1].parse::<usize>() {
+        vec = vec![vec[v - 1]];
+    }
+    let vec = vec;
+
     std::thread::scope(|s| {
         let ts: Vec<_> = vec
             .iter()
