@@ -17,6 +17,7 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
+mod day18;
 
 fn main() {
     let t = Instant::now();
@@ -38,6 +39,7 @@ fn main() {
         day15::day,
         day16::day,
         day17::day,
+        day18::day,
     ];
     std::thread::scope(|s| {
         let ts: Vec<_> = vec
