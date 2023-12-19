@@ -1,4 +1,4 @@
-use std::fmt::{Debug, Formatter};
+use std::fmt::Debug;
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -108,7 +108,7 @@ impl FromStr for Grid {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut plans = Vec::new();
         for line in s.lines() {
-            let mut plan = line.split_whitespace().collect::<Vec<_>>();
+            let plan = line.split_whitespace().collect::<Vec<_>>();
             let dir = Direction::from_str(plan[0]);
             let steps = plan[1].parse().unwrap();
             plans.push(Plan::new(dir, steps));
