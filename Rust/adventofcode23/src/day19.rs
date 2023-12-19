@@ -219,15 +219,15 @@ struct Workflows {
 }
 
 impl Workflows {
-    fn sum_accepted(&self) -> usize {
+    fn _sum_accepted(&self) -> usize {
         self.machine_parts
             .iter()
-            .filter(|&machine_part| self.is_accepted(machine_part))
+            .filter(|&machine_part| self._is_accepted(machine_part))
             .map(|machine_part| machine_part.sum_features())
             .sum()
     }
 
-    fn is_accepted(&self, machine_part: &MachinePart) -> bool {
+    fn _is_accepted(&self, machine_part: &MachinePart) -> bool {
         let mut current_rule = self.rules.get("in").unwrap();
         let mut result = None;
 
@@ -284,7 +284,7 @@ impl Workflows {
             let mut current_range = range.clone();
             let (f, o, a) = &constraint;
 
-            let (mut value, mut value_for_top_range) = match &f {
+            let (value, value_for_top_range) = match &f {
                 Feature::X => (&mut current_range.x, &mut range.x),
                 Feature::M => (&mut current_range.m, &mut range.m),
                 Feature::A => (&mut current_range.a, &mut range.a),
@@ -388,7 +388,7 @@ impl FromStr for Workflows {
 
 fn part1(input: &str) -> usize {
     let workflows = input.parse::<Workflows>().unwrap();
-    //workflows.sum_accepted()
+    //workflows._sum_accepted()
     workflows.sum_accepted2()
 }
 
