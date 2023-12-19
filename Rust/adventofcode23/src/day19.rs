@@ -1,4 +1,3 @@
-use regex::Regex;
 use std::collections::HashMap;
 use std::str::FromStr;
 
@@ -33,9 +32,6 @@ impl Range {
     }
 }
 
-const REGEX_RULE: &str = r"^(\w+)\{.+,(\w+)}$";
-const REGEX_RULE_TERM: &str = r"([xmas])([<>]\d+):(\w+),";
-const REGEX_MACHINE_PART: &str = r"\{x=(\d+),m=(\d+),a=(\d+),s=(\d+)}";
 #[derive(Debug, Clone)]
 struct MachinePart {
     x: usize,
@@ -49,14 +45,25 @@ impl MachinePart {
         Self { x, m, a, s }
     }
 
-    fn parse_machine_parts(s: &str) -> Self {
-        let re = Regex::new(REGEX_MACHINE_PART).unwrap();
+    fn parse_machine_parts(input: &str) -> Self {
+        let input = input.split_once("{").unwrap().1;
+        let input = (&input[..input.len() - 1])
+            .split(",")
+            .collect::<Vec<&str>>();
 
-        let caps = re.captures(s).unwrap();
-        let x = caps[1].parse().unwrap();
-        let m = caps[2].parse().unwrap();
-        let a = caps[3].parse().unwrap();
-        let s = caps[4].parse().unwrap();
+        let (mut x, mut m, mut a, mut s) = (0, 0, 0, 0);
+        for i in 0..input.len() {
+            let tmp = input[i].split_once("=").unwrap();
+            let tmp2 = tmp.1.parse::<usize>().unwrap();
+
+            match tmp.0 {
+                "x" => x = tmp2,
+                "m" => m = tmp2,
+                "a" => a = tmp2,
+                "s" => s = tmp2,
+                _ => {}
+            }
+        }
 
         Self::new(x, m, a, s)
     }
@@ -185,19 +192,22 @@ impl FromStr for Rule {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut constraints = Vec::new();
 
-        let re = Regex::new(REGEX_RULE).unwrap();
-        let caps = re.captures(s).unwrap();
-        let name = caps[1].to_string();
-        let else_ = caps[2].parse::<Action>().unwrap();
+        let s = s.split_once("{").unwrap();
+        let name = s.0;
+        let s = s.1;
+        let mut split_terms = (&s[..s.len() - 1]).split(",").collect::<Vec<&str>>();
 
-        let re = Regex::new(REGEX_RULE_TERM).unwrap();
+        for rule in &split_terms {
+            if let Some(rule) = rule.split_once(":") {
+                let feature = rule.0[0..1].parse::<Feature>().unwrap();
+                let operator = rule.0[1..].parse::<Operator>().unwrap();
+                let action = rule.1.parse::<Action>().unwrap();
 
-        for cap in re.captures_iter(s) {
-            let feature = cap[1].parse::<Feature>().unwrap();
-            let operator = cap[2].parse::<Operator>().unwrap();
-            let action = cap[3].parse::<Action>().unwrap();
-            constraints.push((feature, operator, action));
+                constraints.push((feature, operator, action));
+            }
         }
+
+        let else_ = split_terms.pop().unwrap().parse::<Action>().unwrap();
 
         Ok(Self::new(&name, constraints, else_))
     }
