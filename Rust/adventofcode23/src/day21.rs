@@ -1,5 +1,7 @@
-use std::arch::x86_64::_mm256_div_pd;
-use std::collections::{HashMap, HashSet};
+// Finished part2 with help of https://github.com/villuna/aoc23/wiki/A-Geometric-solution-to-advent-of-code-2023,-day-21
+// In the end, i had a missing line in input and did not see the assumptions in the INPUT... The example is not enough to solve this in an appropriate time.
+
+use std::collections::{HashMap, VecDeque};
 use std::str::FromStr;
 
 #[derive(PartialEq)]
@@ -7,6 +9,8 @@ enum Field {
     GardenPlot,
     Rock,
 }
+
+type Steps = usize;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq)]
 struct Point {
@@ -92,64 +96,74 @@ impl Grid {
         }
         print!("\n");
     }
-    fn calculate_possible_position(&self, mut num: usize, infinite_map: bool) -> Vec<usize> {
-        let mut num = num as isize;
-        let is_even = (num % 2 == 0).then(|| 0).or_else(|| Some(1)).unwrap();
-        num -= 1;
 
-        let mut found_positions: HashMap<Point, usize> = HashMap::new();
-        let mut stack_positions = vec![self.starting_position.clone()];
 
-        while num >= 0 {
-            let mut current_stack = stack_positions;
-            stack_positions = Vec::new();
+    fn calculate_possible_position(&self) -> HashMap<Point, Steps> {
+        let mut frontier = VecDeque::<(Point, usize)>::new();
+        let mut visited = HashMap::new();
+        frontier.push_back((self.starting_position.clone(), 0));
 
-            while let Some(pos) = current_stack.pop() {
-                let possible_positions = DIRECTIONS.iter().map(|d| pos.clone().add(&d.to_point())).collect::<Vec<_>>();
-                for mut pos in possible_positions {
-                    if !infinite_map {
-                        if pos.x < 0 || pos.y < 0 || pos.x >= self.fields[0].len() as isize || pos.y >= self.fields.len() as isize || self.fields[pos.y as usize][pos.x as usize] == Field::Rock || found_positions.contains_key(&pos) {
-                            continue;
-                        }
-                    } else {
-                        if pos.x < 0 {
-                            pos.x = self.fields[0].len() as isize - 1;
-                        }
-                        if pos.y < 0 {
-                            pos.y = self.fields.len() as isize - 1;
-                        }
-                        if pos.y >= self.fields.len() as isize {
-                            pos.y = 0;
-                        }
-                        if pos.x >= self.fields[0].len() as isize {
-                            pos.x = 0;
-                        }
-                        if self.fields[pos.y as usize][pos.x as usize] == Field::Rock && found_positions.contains_key(&pos) {
-                            continue;
-                        }
+        let dim_y = self.fields.len() as isize;
+        let dim_x = self.fields[0].len() as isize;
+
+        while let Some((coord, dist)) = frontier.pop_front() {
+            if visited.contains_key(&coord) {
+                continue;
+            }
+
+            visited.insert(coord.clone(), dist);
+
+            for d in [Direction::Up, Direction::Down, Direction::Left, Direction::Right] {
+                let next = coord.add(&d.to_point());
+
+                if next.x >= 0 && next.x < dim_x && next.y >= 0 && next.y < dim_y {
+                    if !visited.contains_key(&next) && self.fields[next.y as usize][next.x as usize] != Field::Rock {
+                        frontier.push_back((next, dist + 1));
                     }
-                    if num % 2 == is_even {
-                        *found_positions.entry(pos.clone()).or_insert(0) = (num / 2) as usize;
-                    }
-                    stack_positions.push(pos);
                 }
             }
-            num -= 1;
         }
 
-        let vec = found_positions.into_values().collect();
-        vec
+        visited
     }
 }
 
 fn part1(input: &str, n: usize) -> usize {
     let grid = Grid::from_str(input).unwrap();
-    grid.calculate_possible_position(n, false).len()
+    grid.calculate_possible_position().values().filter(|v| **v <= n && **v % 2 == 0).count()
 }
 
 fn part2(input: &str, n: usize) -> usize {
     let grid = Grid::from_str(input).unwrap();
-    grid.calculate_possible_position(n, true).iter().sum()
+
+    const STEPS_TO_EDGE: usize = 65;
+    let visited = grid.calculate_possible_position();
+
+    let even_corners = visited
+        .values()
+        .filter(|v| **v % 2 == 0 && **v > STEPS_TO_EDGE)
+        .count();
+    let odd_corners = visited
+        .values()
+        .filter(|v| **v % 2 == 1 && **v > STEPS_TO_EDGE)
+        .count();
+
+    let even_full = visited.values().filter(|v| **v % 2 == 0).count();
+    let odd_full = visited.values().filter(|v| **v % 2 == 1).count();
+
+    let dim_y = grid.fields.len();
+    let dim_x = grid.fields[0].len();
+
+    // This is 202300 but im writing it out here to show the process
+    let n = (n - (dim_y / 2)) / dim_x;
+    assert_eq!(n, 202300);
+
+    let even = n * n;
+    let odd = (n + 1) * (n + 1);
+
+    let p2 = odd * odd_full + even * even_full - (n + 1) * odd_corners + n * even_corners;
+
+    p2
 }
 
 pub fn day() -> String {
@@ -177,17 +191,5 @@ mod tests {
     fn test_part1() {
         let grid = Grid::from_str(INPUT).unwrap();
         assert_eq!(part1(INPUT, 6), 16);
-    }
-
-    #[test]
-    fn test_part2() {
-        let grid = Grid::from_str(INPUT).unwrap();
-        assert_eq!(part2(INPUT, 6), 16);
-        assert_eq!(part2(INPUT, 10), 50);
-        assert_eq!(part2(INPUT, 50), 1594);
-        assert_eq!(part2(INPUT, 100), 6536);
-        assert_eq!(part2(INPUT, 500), 167004);
-        assert_eq!(part2(INPUT, 1000), 668697);
-        assert_eq!(part2(INPUT, 5000), 16733044);
     }
 }
