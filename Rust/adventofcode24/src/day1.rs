@@ -2,12 +2,8 @@ use std::str::FromStr;
 
 type Location = u32;
 
-#[derive(Debug)]
-enum ParserError {
-    InvalidType,
-}
 impl FromStr for UnsortedLocations {
-    type Err = ParserError;
+    type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let arr: Vec<(Location, Location)> = s
