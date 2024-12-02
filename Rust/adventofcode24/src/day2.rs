@@ -53,16 +53,18 @@ impl Report {
     }
 
     fn is_dampener_safe(&self) -> bool {
-        let mut dampened_levels = Vec::new();
-        dampened_levels.push(self.levels.clone());
+        if Self::calculate_safeness(&self.levels) {
+            return true;
+        }
 
         for i in 0..self.levels.iter().count() {
             let mut new_list = self.levels.clone();
             new_list.remove(i);
-            dampened_levels.push(new_list);
+            if Self::calculate_safeness(&new_list) {
+                return true;
+            }
         }
-
-        dampened_levels.iter().map(|x| Self::calculate_safeness(x)).filter(|x| *x).count() > 0
+        false
     }
 }
 
@@ -83,8 +85,9 @@ fn part1(input: &str) -> usize {
 }
 
 fn part2(input: &str) -> usize {
-    let rep = Reports::from_str(input).unwrap();
-    rep.get_count_of_reports_dampener()
+    Reports::from_str(input)
+        .unwrap()
+        .get_count_of_reports_dampener()
 }
 
 pub fn day() -> String {
