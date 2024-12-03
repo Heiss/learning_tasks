@@ -1,13 +1,16 @@
+use std::cmp::PartialEq;
 use std::str::FromStr;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 enum LexItem {
-    Char(char),
     Num(usize),
     ParanLeft,
     ParanRight,
     Unspecified,
     Komma,
+    Mul,
+    Do,
+    Dont,
 }
 
 #[derive(Debug)]
@@ -39,9 +42,41 @@ impl FromStr for Parser {
 
         while let Some(&c) = it.peek() {
             match c {
-                'm' | 'u' | 'l' | 'd' | 'o' | 'n' | '\'' | 't' => {
+                'm' => {
                     it.next();
-                    lexes.push(LexItem::Char(c))
+                    if Some(&'u') != it.peek() {
+                        continue;
+                    }
+                    it.next();
+                    if Some(&'l') != it.peek() {
+                        continue;
+                    }
+
+                    lexes.push(LexItem::Mul);
+                    it.next();
+                }
+                'd' => {
+                    it.next();
+                    if Some(&'o') != it.peek() {
+                        continue;
+                    }
+                    it.next();
+                    if Some(&'n') == it.peek() {
+                        it.next();
+                        if Some(&'\'') != it.peek() {
+                            continue;
+                        }
+
+                        it.next();
+                        if Some(&'t') != it.peek() {
+                            continue;
+                        }
+
+                        lexes.push(LexItem::Dont)
+                    } else {
+                        lexes.push(LexItem::Do)
+                    }
+                    it.next();
                 }
                 '0'..='9' => {
                     let n = {
@@ -50,6 +85,7 @@ impl FromStr for Parser {
                             if !c.is_numeric() {
                                 break;
                             }
+
                             number.push(c);
                             it.next();
                         }
@@ -69,7 +105,7 @@ impl FromStr for Parser {
                     it.next();
                     lexes.push(LexItem::ParanRight);
                 }
-                v => {
+                _ => {
                     it.next();
                     lexes.push(LexItem::Unspecified);
                 }
@@ -80,19 +116,44 @@ impl FromStr for Parser {
         let lexes = lexes;
 
         let mut tokens = Vec::new();
-        for v in lexes.windows(8) {
+        let mut it = lexes.iter().peekable();
+
+        while let Some(&v) = it.peek() {
             match v {
-                [LexItem::Char('m'), LexItem::Char('u'), LexItem::Char('l'), LexItem::ParanLeft, LexItem::Num(n1), LexItem::Komma, LexItem::Num(n2), LexItem::ParanRight] => {
-                    tokens.push(Token::Mul(*n1, *n2))
-                }
-                [LexItem::Char('d'), LexItem::Char('o'), LexItem::Char('n'), LexItem::Char('\''), LexItem::Char('t'), LexItem::ParanLeft, LexItem::ParanRight, ..] => {
-                    tokens.push(Token::Dont)
-                }
-                [LexItem::Char('d'), LexItem::Char('o'), LexItem::ParanLeft, LexItem::ParanRight, ..] => {
-                    tokens.push(Token::Do)
+                LexItem::Do => tokens.push(Token::Do),
+                LexItem::Dont => tokens.push(Token::Dont),
+                LexItem::Mul => {
+                    it.next();
+                    if Some(&&LexItem::ParanLeft) != it.peek() {
+                        continue;
+                    }
+                    it.next();
+                    let n1;
+                    if let Some(&&LexItem::Num(n)) = it.peek() {
+                        n1 = n;
+                    } else {
+                        continue;
+                    }
+                    it.next();
+                    if Some(&&LexItem::Komma) != it.peek() {
+                        continue;
+                    }
+                    it.next();
+                    let n2;
+                    if let Some(&&LexItem::Num(n)) = it.peek() {
+                        n2 = n;
+                    } else {
+                        continue;
+                    }
+                    it.next();
+                    if Some(&&LexItem::ParanRight) != it.peek() {
+                        continue;
+                    }
+                    tokens.push(Token::Mul(n1, n2));
                 }
                 _ => {}
             }
+            it.next();
         }
 
         Ok(Self { tokens })
