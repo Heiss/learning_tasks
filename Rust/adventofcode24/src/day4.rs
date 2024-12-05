@@ -80,6 +80,91 @@ impl PartialEq<Self> for Grid {
     }
 }
 
+struct PaddedGrid {
+    grid: Grid,
+    padding_size: NonZeroUsize,
+}
+
+impl IntoIterator for PaddedGrid {
+    type Item = PaddedGrid;
+    type IntoIter = IterPaddedGrid;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut all_xs = Vec::new();
+        for (i, vs) in self.grid.values.iter().enumerate() {
+            for (j, c) in vs.iter().enumerate() {
+                // FIXME: c ist Char::Dot und damit immer True!
+                if c == &Char::X {
+                    all_xs.push((j, i));
+                }
+            }
+        }
+        IterPaddedGrid {
+            grid: self,
+            xs: all_xs,
+        }
+    }
+}
+
+impl PaddedGrid {
+    fn get_window(&self, n: NonZeroUsize, x: usize, y: usize) -> Grid {
+        let min_column = x - n.get();
+        let max_column = x + n.get();
+        let min_row = y - n.get();
+        let max_row = y + n.get();
+
+        let mut new_grid = Vec::new();
+        println!("{} {}\n{}", x, y, self.grid);
+        for i in min_row..max_row {
+            new_grid.push(self.grid.values[i][min_column..max_column].to_vec());
+        }
+        Grid { values: new_grid }
+    }
+
+    fn count_xmas(self) -> usize {
+        let mut variants = Vec::new();
+        variants.push(Grid::from_str(
+            r#".......
+.......
+.......
+...XMAS
+.......
+.......
+......."#,
+        ));
+        variants.push(Grid::from_str(
+            r#".......
+.......
+.......
+...X...
+....M..
+.....A.
+......S"#,
+        ));
+        let mut variants: Vec<Grid> = variants.into_iter().map(|g| g.unwrap()).collect();
+        variants.append(&mut variants.iter().map(Grid::flipped_vertical).collect());
+        variants.append(&mut variants.iter().map(Grid::flipped_horizontal).collect());
+        variants.append(&mut variants.iter().map(Grid::transposed).collect());
+        variants.append(&mut variants.iter().map(Grid::flipped_horizontal).collect());
+        variants.append(&mut variants.iter().map(Grid::flipped_vertical).collect());
+        variants.append(&mut variants.iter().map(Grid::transposed).collect());
+        let variants: Vec<Grid> = variants.into_iter().unique().collect();
+
+        self.into_iter()
+            .filter(|g| {
+                let g = g.into();
+                variants.contains(&g)
+            })
+            .count()
+    }
+}
+
+impl Into<Grid> for &PaddedGrid {
+    fn into(self) -> Grid {
+        self.grid.clone()
+    }
+}
+
 impl Grid {
     fn flipped_vertical(&self) -> Grid {
         let mut new = self.values.clone();
@@ -116,30 +201,51 @@ impl Grid {
         GridWindow::new(&self, n)
     }
 
-    fn count_xmas(&self) -> usize {
-        let mut variants = Vec::new();
-        variants.push(Grid::from_str(
-            r#"XMAS
-....
-....
-...."#,
-        ));
-        variants.push(Grid::from_str(
-            r#"X...
-.M..
-..A.
-...S"#,
-        ));
-        let mut variants: Vec<Grid> = variants.into_iter().map(|g| g.unwrap()).collect();
-        variants.append(&mut variants.iter().map(Grid::flipped_horizontal).collect());
-        variants.append(&mut variants.iter().map(Grid::flipped_vertical).collect());
-        variants.append(&mut variants.iter().map(Grid::transposed).collect());
-        variants.append(&mut variants.iter().map(Grid::flipped_horizontal).collect());
-        variants.append(&mut variants.iter().map(Grid::flipped_vertical).collect());
-        variants.append(&mut variants.iter().map(Grid::transposed).collect());
-        let variants: Vec<Grid> = variants.into_iter().unique().collect();
+    fn add_padding(mut self, n: NonZeroUsize) -> PaddedGrid {
+        let max_row = self.values.len();
+        let max_column = self.values[0].len();
+        let row_padding: Vec<Char> = (0..max_column + 2 * n.get()).map(|_| Char::Dot).collect();
+        let column_padding: Vec<Char> = (0..n.get()).map(|_| Char::Dot).collect();
 
-        self.windows(4).filter(|g| variants.contains(g)).count()
+        for i in 0..max_row {
+            let mut new_row = column_padding.clone();
+            new_row.append(&mut self.values[i]);
+            new_row.append(&mut column_padding.clone());
+            self.values[i] = new_row;
+        }
+
+        for _ in 0..n.get() {
+            self.values.insert(0, row_padding.clone());
+            self.values.push(row_padding.clone());
+        }
+
+        PaddedGrid {
+            grid: self,
+            padding_size: n,
+        }
+    }
+}
+
+struct IterPaddedGrid {
+    grid: PaddedGrid,
+    xs: Vec<(usize, usize)>,
+}
+
+impl Iterator for IterPaddedGrid {
+    type Item = PaddedGrid;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.xs.len() == 0 {
+            None
+        } else {
+            let (x, y) = self.xs.pop().unwrap();
+            let grid = self.grid.get_window(NonZeroUsize::new(3).unwrap(), x, y);
+
+            Some(PaddedGrid {
+                grid,
+                padding_size: self.grid.padding_size,
+            })
+        }
     }
 }
 
@@ -201,7 +307,10 @@ impl Display for Grid {
 }
 
 fn part1(input: &str) -> usize {
-    Grid::from_str(input).unwrap().count_xmas()
+    Grid::from_str(input)
+        .unwrap()
+        .add_padding(NonZeroUsize::new(3).unwrap())
+        .count_xmas()
 }
 
 fn part2(input: &str) -> usize {
