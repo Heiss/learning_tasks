@@ -125,24 +125,6 @@ impl Grid {
 ...."#,
         ));
         variants.push(Grid::from_str(
-            r#"....
-XMAS
-....
-...."#,
-        ));
-        variants.push(Grid::from_str(
-            r#"X...
-M...
-A...
-S..."#,
-        ));
-        variants.push(Grid::from_str(
-            r#".X..
-.M..
-.A..
-.S.."#,
-        ));
-        variants.push(Grid::from_str(
             r#"X...
 .M..
 ..A.
@@ -156,10 +138,6 @@ S..."#,
         variants.append(&mut variants.iter().map(Grid::flipped_vertical).collect());
         variants.append(&mut variants.iter().map(Grid::transposed).collect());
         let variants: Vec<Grid> = variants.into_iter().unique().collect();
-
-        for v in &variants {
-            println!("{}", v);
-        }
 
         self.windows(4).filter(|g| variants.contains(g)).count()
     }
