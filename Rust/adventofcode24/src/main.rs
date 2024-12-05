@@ -3,6 +3,7 @@ use std::time::Instant;
 mod day1;
 mod day2;
 mod day3;
+mod day4;
 
 fn main() {
     use std::env;
@@ -13,7 +14,8 @@ fn main() {
     let mut vec = vec![
         day1::day,
         day2::day,
-        day3::day
+        day3::day,
+        day4::day
     ];
     if let Ok(v) = args[1].parse::<usize>() {
         vec = vec![vec[v - 1]];
