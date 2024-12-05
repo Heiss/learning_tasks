@@ -16,10 +16,10 @@ enum Char {
 impl PartialEq<Char> for Char {
     fn eq(&self, other: &Char) -> bool {
         match (self, other) {
-            (Char::Dot, _) | (_, Char::Dot) => true,
             (Char::A, Char::A) | (Char::X, Char::X) | (Char::M, Char::M) | (Char::S, Char::S) => {
                 true
             }
+            (Char::Dot, _) | (_, Char::Dot) => false,
             _ => false,
         }
     }
@@ -65,6 +65,13 @@ impl FromStr for Grid {
     }
 }
 
+#[derive(PartialEq)]
+enum CompareChar {
+    Equal,
+    Unequal,
+    Ignore,
+}
+
 impl PartialEq<Self> for Grid {
     fn eq(&self, other: &Self) -> bool {
         if self.values.len() != other.values.len() || self.values[0].len() != other.values[0].len()
@@ -72,14 +79,32 @@ impl PartialEq<Self> for Grid {
             return false;
         }
 
-        self.values
+        let mut iter = self
+            .values
             .iter()
             .zip(other.values.iter())
             .flat_map(|(l, r)| l.iter().zip(r.iter()))
-            .all(|(l, r)| l == r)
+            .map(|(l, r)| match (l, r) {
+                (Char::Dot, _) | (_, Char::Dot) => CompareChar::Ignore,
+                (Char::X, Char::X)
+                | (Char::M, Char::M)
+                | (Char::A, Char::A)
+                | (Char::S, Char::S) => CompareChar::Equal,
+                _ => CompareChar::Unequal,
+            })
+            .filter(|v| v != &CompareChar::Ignore);
+
+        // ugly to check, if you search for XMAS or X-MAS
+        let count = if self.values.len() == 7 { 4 } else { 5 };
+        if (iter.clone().count() == count) && iter.all(|v| v == CompareChar::Equal) {
+            true
+        } else {
+            false
+        }
     }
 }
 
+#[derive(Clone)]
 struct PaddedGrid {
     grid: Grid,
     padding_size: NonZeroUsize,
@@ -91,17 +116,21 @@ impl IntoIterator for PaddedGrid {
 
     fn into_iter(self) -> Self::IntoIter {
         let mut all_xs = Vec::new();
+        let mut all_as = Vec::new();
         for (i, vs) in self.grid.values.iter().enumerate() {
             for (j, c) in vs.iter().enumerate() {
-                // FIXME: c ist Char::Dot und damit immer True!
-                if c == &Char::X {
-                    all_xs.push((j, i));
-                }
+                match c {
+                    Char::X => all_xs.push((j, i)),
+                    Char::A => all_as.push((j, i)),
+                    _ => {}
+                };
             }
         }
         IterPaddedGrid {
             grid: self,
             xs: all_xs,
+            r#as: all_as,
+            iter_for: Char::X,
         }
     }
 }
@@ -114,9 +143,8 @@ impl PaddedGrid {
         let max_row = y + n.get();
 
         let mut new_grid = Vec::new();
-        println!("{} {}\n{}", x, y, self.grid);
-        for i in min_row..max_row {
-            new_grid.push(self.grid.values[i][min_column..max_column].to_vec());
+        for i in min_row..=max_row {
+            new_grid.push(self.grid.values[i][min_column..=max_column].to_vec());
         }
         Grid { values: new_grid }
     }
@@ -141,27 +169,63 @@ impl PaddedGrid {
 .....A.
 ......S"#,
         ));
+
         let mut variants: Vec<Grid> = variants.into_iter().map(|g| g.unwrap()).collect();
         variants.append(&mut variants.iter().map(Grid::flipped_vertical).collect());
         variants.append(&mut variants.iter().map(Grid::flipped_horizontal).collect());
         variants.append(&mut variants.iter().map(Grid::transposed).collect());
-        variants.append(&mut variants.iter().map(Grid::flipped_horizontal).collect());
         variants.append(&mut variants.iter().map(Grid::flipped_vertical).collect());
-        variants.append(&mut variants.iter().map(Grid::transposed).collect());
+        variants.append(&mut variants.iter().map(Grid::flipped_horizontal).collect());
         let variants: Vec<Grid> = variants.into_iter().unique().collect();
 
         self.into_iter()
-            .filter(|g| {
-                let g = g.into();
-                variants.contains(&g)
+            .map(|g| {
+                let c = variants
+                    .iter()
+                    .filter(|&v| *v == Grid::from(g.clone()))
+                    .count();
+                c
             })
-            .count()
+            .sum()
+    }
+
+    fn count_mas(self) -> usize {
+        let mut variants = Vec::new();
+        variants.push(Grid::from_str(
+            r#"M.S
+.A.
+M.S"#,
+        ));
+
+        let mut variants: Vec<Grid> = variants.into_iter().map(|g| g.unwrap()).collect();
+        variants.append(&mut variants.iter().map(Grid::flipped_vertical).collect());
+        variants.append(&mut variants.iter().map(Grid::flipped_horizontal).collect());
+        variants.append(&mut variants.iter().map(Grid::transposed).collect());
+        variants.append(&mut variants.iter().map(Grid::flipped_vertical).collect());
+        variants.append(&mut variants.iter().map(Grid::flipped_horizontal).collect());
+        variants.append(&mut variants.iter().map(Grid::flipped_vertical).collect());
+        variants.append(&mut variants.iter().map(Grid::flipped_horizontal).collect());
+        variants.append(&mut variants.iter().map(Grid::transposed).collect());
+        variants.append(&mut variants.iter().map(Grid::flipped_vertical).collect());
+        variants.append(&mut variants.iter().map(Grid::flipped_horizontal).collect());
+        let variants: Vec<Grid> = variants.into_iter().unique().collect();
+
+        self.into_iter()
+            .set_iter_for(Char::A)
+            .map(|g| {
+                let c = variants
+                    .iter()
+                    .filter(|&v| *v == Grid::from(g.clone()))
+                    .count();
+                c
+            })
+            .sum()
     }
 }
 
-impl Into<Grid> for &PaddedGrid {
-    fn into(self) -> Grid {
-        self.grid.clone()
+impl From<PaddedGrid> for Grid {
+    fn from(value: PaddedGrid) -> Self {
+        value.grid
     }
 }
 
@@ -197,7 +261,7 @@ impl Grid {
         Grid { values: new }
     }
 
-    fn windows(&self, n: usize) -> GridWindow<'_> {
+    fn _windows(&self, n: usize) -> GridWindow<'_> {
         GridWindow::new(&self, n)
     }
 
@@ -229,12 +293,17 @@ impl Grid {
 struct IterPaddedGrid {
     grid: PaddedGrid,
     xs: Vec<(usize, usize)>,
+    r#as: Vec<(usize, usize)>,
+    iter_for: Char,
 }
 
-impl Iterator for IterPaddedGrid {
-    type Item = PaddedGrid;
+impl IterPaddedGrid {
+    fn set_iter_for(&mut self, c: Char) -> &mut Self {
+        self.iter_for = c;
+        self
+    }
 
-    fn next(&mut self) -> Option<Self::Item> {
+    fn next_x(&mut self) -> Option<PaddedGrid> {
         if self.xs.len() == 0 {
             None
         } else {
@@ -247,8 +316,37 @@ impl Iterator for IterPaddedGrid {
             })
         }
     }
+
+    fn next_a(&mut self) -> Option<PaddedGrid> {
+        if self.r#as.len() == 0 {
+            None
+        } else {
+            let (x, y) = self.r#as.pop().unwrap();
+            let grid = self.grid.get_window(NonZeroUsize::new(1).unwrap(), x, y);
+
+            Some(PaddedGrid {
+                grid,
+                padding_size: self.grid.padding_size,
+            })
+        }
+    }
 }
 
+impl Iterator for IterPaddedGrid {
+    type Item = PaddedGrid;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.iter_for {
+            Char::X => self.next_x(),
+            Char::A => self.next_a(),
+            _ => panic!("Not valid Character"),
+        }
+    }
+}
+
+// All code from below is not needed anymore and was written for a previous approach,
+// but i liked the exercise, how to implement windows iterator in rust
+#[allow(dead_code)]
 struct GridWindow<'a> {
     v: &'a Grid,
     size: NonZeroUsize,
@@ -257,6 +355,7 @@ struct GridWindow<'a> {
 }
 
 impl<'a> GridWindow<'a> {
+    #[allow(dead_code)]
     fn new(v: &'a Grid, size: usize) -> Self {
         Self {
             v,
@@ -314,7 +413,10 @@ fn part1(input: &str) -> usize {
 }
 
 fn part2(input: &str) -> usize {
-    0
+    Grid::from_str(input)
+        .unwrap()
+        .add_padding(NonZeroUsize::new(1).unwrap())
+        .count_mas()
 }
 
 pub fn day() -> String {
@@ -326,9 +428,7 @@ pub fn day() -> String {
 mod tests {
     use super::*;
 
-    #[test]
-    fn day1() {
-        const INPUT: &str = r#"MMMSXXMASM
+    const INPUT: &str = r#"MMMSXXMASM
 MSAMXMSMSA
 AMXSXMAAMM
 MSAMASMSMX
@@ -338,12 +438,12 @@ SMSMSASXSS
 SAXAMASAAA
 MAMMMXMMMM
 MXMXAXMASX"#;
+    #[test]
+    fn day1() {
         assert_eq!(part1(INPUT), 18);
     }
     #[test]
     fn day2() {
-        const INPUT: &str =
-            r#"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"#;
-        assert_eq!(part2(INPUT), 48);
+        assert_eq!(part2(INPUT), 9);
     }
 }
