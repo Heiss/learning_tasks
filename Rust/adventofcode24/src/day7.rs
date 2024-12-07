@@ -1,3 +1,5 @@
+use itertools::Itertools;
+use std::collections::HashSet;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -69,7 +71,7 @@ impl Operators {
     }
 
     fn get_ops_combinations_with_concat(n: usize) -> Vec<Vec<Operators>> {
-        let mut res = Vec::new();
+        let mut res = HashSet::new();
         for combi in Self::get_ops_combinations(n) {
             for i in 0..2_usize.pow(n as u32) {
                 let a: Vec<Operators> = Self::int_to_bit_array(i, n)
@@ -81,11 +83,11 @@ impl Operators {
                         _ => panic!("Should not happen!"),
                     })
                     .collect();
-                res.push(a);
+                res.insert(a);
             }
         }
 
-        res
+        res.into_iter().collect()
     }
 }
 
@@ -130,7 +132,7 @@ impl Calibrations {
         false
     }
 
-    fn is_really_true(&self) -> bool {
+    fn is_valid_with_concat(&self) -> bool {
         let operations: Vec<Vec<Operators>> =
             Operators::get_ops_combinations_with_concat(self.numbers.len() - 1);
 
@@ -154,7 +156,7 @@ fn part1(input: &str) -> usize {
 }
 
 fn part2(input: &str) -> usize {
-    // Better approach would be to calculate backwards: Check if the last number is a divisor
+    // Speedup approach would be to calculate backwards: Check if the last number is a divisor
     // of the current searched value.
     // If it is, calculate the number and go one number backward.
     // If not, subtracts it and go one number backwards.
@@ -173,7 +175,7 @@ fn part2(input: &str) -> usize {
 
     sum + concat_vals
         .iter()
-        .filter(|c| c.is_really_true())
+        .filter(|c| c.is_valid_with_concat())
         .map(|v| v.search_value)
         .sum::<usize>()
 }

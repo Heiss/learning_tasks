@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use std::cmp::PartialEq;
 use std::collections::HashSet;
 use std::str::FromStr;
@@ -151,9 +152,8 @@ impl Grid {
         self.guard.peek(self)
     }
 
-    fn is_a_path_on_the_right(&self, seen_positions: &HashSet<Guard>) -> bool {
+    fn is_a_loop_on_the_right(&self, seen_positions: &HashSet<Guard>, mut map: Grid) -> bool {
         let mut seen_positions = seen_positions.clone();
-        let mut map = self.clone();
         map.guard.turn_right();
 
         while let Some(_) = map.walk() {
@@ -220,13 +220,12 @@ fn part2(input: &str) -> usize {
 
     while let Some((o, p)) = grid.peek() {
         visited_positions.insert(grid.guard.clone());
-        if *o != Object::Box && grid.is_a_path_on_the_right(&visited_positions) {
-            if !visited_positions
-                .iter()
-                .map(|p| (p.x as isize, p.y as isize))
-                .any(|q| p == q)
-            {
-                obstacle_positions.insert((p.0 as usize, p.1 as usize));
+        let mut m = grid.clone();
+        m.map[p.1 as usize][p.0 as usize] = Object::Box;
+        if *o != Object::Box && grid.is_a_loop_on_the_right(&visited_positions, m) {
+            let p = (p.0 as usize, p.1 as usize);
+            if !visited_positions.iter().map(|g| (g.x, g.y)).contains(&p) {
+                obstacle_positions.insert(p);
             }
         }
         grid.walk();
