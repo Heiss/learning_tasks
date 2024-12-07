@@ -9,4 +9,3 @@ edition = "2021"
 members = ["adventofcode20", "adventofcode21", "adventofcode22", "adventofcode23", "adventofcode24", "design-patterns", "guess-game", "kata", "leetcode"]
 
 [dependencies]
-itertools = "0.13.0"
