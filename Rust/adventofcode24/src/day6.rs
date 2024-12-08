@@ -232,6 +232,7 @@ fn part2(input: &str) -> usize {
     }
 
     obstacle_positions.remove(&(init.x, init.y));
+    /* For output purposes only
     for y in 0..grid.map.len() {
         let mut res = String::new();
         for x in 0..grid.map[0].len() {
@@ -261,7 +262,7 @@ fn part2(input: &str) -> usize {
             }
         }
         println!("{}", res);
-    }
+    }*/
 
     obstacle_positions.len()
 }

@@ -1,8 +1,8 @@
-use itertools::Itertools;
 use std::collections::HashSet;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[allow(dead_code)]
 enum Operators {
     Add,
     Mul,
@@ -70,7 +70,8 @@ impl Operators {
         res
     }
 
-    fn get_ops_combinations_with_concat(n: usize) -> Vec<Vec<Operators>> {
+    /// First approach
+    fn _get_ops_combinations_with_concat(n: usize) -> Vec<Vec<Operators>> {
         let mut res = HashSet::new();
         for combi in Self::get_ops_combinations(n) {
             for i in 0..2_usize.pow(n as u32) {
@@ -132,9 +133,11 @@ impl Calibrations {
         false
     }
 
-    fn is_valid_with_concat(&self) -> bool {
+    /// First approach without any optimizations. But it works and is BFS.
+    /// Look at [Self::check_preorder] for DFS approach
+    fn _is_valid_with_concat(&self) -> bool {
         let operations: Vec<Vec<Operators>> =
-            Operators::get_ops_combinations_with_concat(self.numbers.len() - 1);
+            Operators::_get_ops_combinations_with_concat(self.numbers.len() - 1);
 
         for o in operations.iter() {
             if self.search_value == Operators::ops(&self.numbers, o) {
@@ -143,6 +146,31 @@ impl Calibrations {
         }
 
         false
+    }
+
+    /// This approach inverts all operations. Firstly, inverts the input numbers.
+    /// After this invert the lookup search.
+    /// The opposite of Mul is Div,
+    /// Sub for Add and
+    /// "Sub the first number of the stack from the searched value. Accept the number If the resulting number can be divided by 10."
+    /// because concat can simply described mathematically as
+    /// "Add as much zeros to the first number as much digits the second number has and add the second number".
+    /// Code mostly taken from https://github.com/lavafroth/aoc/blob/master/breakneck/day7_2/src/main.rs
+    fn check_preorder(res: usize, values: &[usize]) -> bool {
+        let Some(&top) = values.first() else {
+            return false;
+        };
+        (values.len() == 1 && res == top)
+            || (res % top == 0 && Self::check_preorder(res / top, &values[1..]))
+            || (res > top && Self::check_preorder(res - top, &values[1..]))
+            || res
+                .checked_sub(top)
+                .zip(top.checked_ilog10().map(|log10| 10usize.pow(log10 + 1)))
+                .and_then(|(delta, power_of_10)| {
+                    (delta % power_of_10 == 0)
+                        .then_some(Self::check_preorder(delta / power_of_10, &values[1..]))
+                })
+                .unwrap_or_default()
     }
 }
 
@@ -175,7 +203,12 @@ fn part2(input: &str) -> usize {
 
     sum + concat_vals
         .iter()
-        .filter(|c| c.is_valid_with_concat())
+        .filter(|&c| {
+            Calibrations::check_preorder(
+                c.search_value,
+                &c.numbers.clone().into_iter().rev().collect::<Vec<usize>>(),
+            )
+        })
         .map(|v| v.search_value)
         .sum::<usize>()
 }
