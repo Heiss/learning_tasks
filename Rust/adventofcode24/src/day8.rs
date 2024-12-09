@@ -115,9 +115,9 @@ fn part1(input: &str) -> usize {
     set.len()
 }
 
-fn part2(_input: &str) -> usize {
+fn part2(input: &str) -> usize {
     let mut set = HashSet::new();
-    let (map, dim) = Antenna::from_str(_input);
+    let (map, dim) = Antenna::from_str(input);
     for (_, antennas) in &map {
         for (i, as1) in antennas.iter().enumerate() {
             for as2 in antennas.iter().skip(i + 1) {
