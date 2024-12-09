@@ -108,7 +108,7 @@ fn part2(input: &str) -> usize {
 }
 
 pub fn day() -> String {
-    let input = include_str!("../input/day11.txt");
+    let input = include_str!("../../../input/Rust/adventofcode23/day11.txt");
     format!("Day 11\tPart 1: {}\tPart 2: {}", part1(input), part2(input))
 }
 

@@ -27,7 +27,7 @@ impl Submarine {
 }
 
 pub fn part1() {
-    let mut f = File::open("./day2.txt").expect("No input.txt found");
+    let f = include_str!("../../../input/Rust/adventofcode21/day2.txt");
     let mut buf: String = "".into();
     f.read_to_string(&mut buf).expect("Cannot read input.txt");
 
