@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="EMPTY_MODULE" version="4">
   <component name="NewModuleRootManager">
-    <content url="file://$MODULE_DIR$" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/Rust/adventofcode20/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Rust/adventofcode21/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Rust/adventofcode22/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Rust/adventofcode23/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Rust/adventofcode24/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Rust/design-patterns/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Rust/guess-game/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Rust/kata/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Rust/leetcode/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/Rust/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/Rust/target" />
+    </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
