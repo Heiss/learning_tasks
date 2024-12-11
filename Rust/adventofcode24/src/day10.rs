@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
 struct Map {
@@ -36,7 +36,6 @@ impl Map {
 
 type Point = (usize, usize);
 fn distance(a: Point, b: Point) -> f64 {
-    println!("a {:?}, b {:?}", a, b);
     (((b.0.abs_diff(a.0)).pow(2) + (b.1.abs_diff(a.1)).pow(2)) as f64).sqrt()
 }
 
@@ -45,15 +44,61 @@ fn manhattan_distance(a: Point, b: Point) -> usize {
 }
 
 fn part1(input: &str) -> usize {
-    let entries = Map::from_str(input).unwrap().find_entries();
-    for i in 0..=9 {
-        todo!("Which approach could be the best? A*?")
+    let map = Map::from_str(input).unwrap();
+    let entries = map.find_entries();
+    let mut starting_points: Vec<Point> = entries.get(&0).unwrap().iter().map(|v| *v).collect();
+    let mut sum = 0;
+    while let Some(starting_point) = starting_points.pop() {
+        let mut reached_positions_with_9 = HashSet::new();
+        let mut next_positions = vec![starting_point];
+        while let Some(next_position) = next_positions.pop() {
+            let i = map.grid[next_position.1][next_position.0];
+
+            if i == 9 {
+                reached_positions_with_9.insert(next_position);
+                continue;
+            }
+
+            let next_possible_positions = entries.get(&(i + 1)).unwrap();
+            next_positions.append(
+                &mut next_possible_positions
+                    .iter()
+                    .map(|v| *v)
+                    .filter(|&v| manhattan_distance(next_position, v) == 1)
+                    .collect(),
+            );
+        }
+        sum += reached_positions_with_9.len();
     }
-    0
+    sum
 }
 
 fn part2(input: &str) -> usize {
-    0
+    let map = Map::from_str(input).unwrap();
+    let entries = map.find_entries();
+    let mut starting_points: Vec<Point> = entries.get(&0).unwrap().iter().map(|v| *v).collect();
+    let mut sum = 0;
+    while let Some(starting_point) = starting_points.pop() {
+        let mut next_positions = vec![starting_point];
+        while let Some(next_position) = next_positions.pop() {
+            let i = map.grid[next_position.1][next_position.0];
+
+            if i == 9 {
+                sum += 1;
+                continue;
+            }
+
+            let next_possible_positions = entries.get(&(i + 1)).unwrap();
+            next_positions.append(
+                &mut next_possible_positions
+                    .iter()
+                    .map(|v| *v)
+                    .filter(|&v| manhattan_distance(next_position, v) == 1)
+                    .collect(),
+            );
+        }
+    }
+    sum
 }
 
 pub fn day() -> String {
@@ -81,6 +126,18 @@ mod tests {
     fn day1() {
         assert_eq!(
             part1(
+                r#"...0...
+...1...
+...2...
+6543456
+7.....7
+8.....8
+9.....9"#
+            ),
+            2
+        );
+        assert_eq!(
+            part1(
                 r#"..90..9
 ...1.98
 ...2..7
@@ -101,24 +158,24 @@ mod tests {
 ...9..2
 .....01"#
             ),
-            2
-        );
-        assert_eq!(
-            part1(
-                r#"...0...
-...1...
-...2...
-6543456
-7.....7
-8.....8
-9.....9"#
-            ),
-            2
+            3
         );
         assert_eq!(part1(INPUT), 36);
     }
     #[test]
     fn day2() {
-        assert_eq!(part2(INPUT), 0);
+        assert_eq!(
+            part2(
+                r#".....0.
+..4321.
+..5..2.
+..6543.
+..7..4.
+..8765.
+..9...."#
+            ),
+            3
+        );
+        assert_eq!(part2(INPUT), 81);
     }
 }
