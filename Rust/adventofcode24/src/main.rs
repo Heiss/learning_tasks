@@ -1,6 +1,9 @@
 use std::time::Instant;
 
 mod day1;
+mod day10;
+mod day11;
+mod day12;
 mod day2;
 mod day3;
 mod day4;
@@ -9,8 +12,6 @@ mod day6;
 mod day7;
 mod day8;
 mod day9;
-mod day10;
-mod day11;
 
 fn main() {
     use std::env;
@@ -29,7 +30,8 @@ fn main() {
         day8::day,
         day9::day,
         day10::day,
-        day11::day
+        day11::day,
+        day12::day,
     ];
     if let Ok(v) = args[1].parse::<usize>() {
         vec = vec![vec[v - 1]];
