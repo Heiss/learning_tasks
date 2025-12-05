@@ -28,20 +28,51 @@ impl ProductIdRange {
             .collect()
     }
     fn get_invalid_product_ids_2(&self) -> Vec<usize> {
-        let mut buf = String::with_capacity(20);
-        (self.start..=self.end)
-            .filter(|&i| {
-                buf.clear();
-                let _ = write!(buf, "{}", i);
-                ProductId(&buf).repeating_pattern_inside()
-            })
-            .collect()
+        let mut found = std::collections::HashSet::new();
+        let start = self.start;
+        let end = self.end;
+        
+        // Bestimme die Anzahl der Ziffern für Start und Ende
+        let start_digits = if start == 0 { 1 } else { start.ilog10() + 1 };
+        let end_digits = if end == 0 { 1 } else { end.ilog10() + 1 };
+
+        // Iteriere über die mögliche Anzahl an Stellen (d)
+        for d in start_digits..=end_digits {
+            // Ein Muster der Länge l muss d teilen
+            // l < d, da mindestens 2 Wiederholungen nötig sind
+            for l in 1..=d / 2 {
+                if d % l == 0 {
+                    // Berechne den Multiplikator M (Repunit)
+                    // M = (10^d - 1) / (10^l - 1)
+                    // Beispiel d=4, l=2: M = 9999 / 99 = 101
+                    let num = 10_u128.pow(d) - 1;
+                    let den = 10_u128.pow(l) - 1;
+                    let m = (num / den) as usize;
+
+                    // Wir suchen Zahlen N = P * m, die im Bereich [start, end] liegen.
+                    // P muss genau l Stellen haben, also P in [10^(l-1), 10^l - 1]
+                    
+                    let p_lower_bound = (start + m - 1) / m; // ceil(start / m)
+                    let p_upper_bound = end / m;             // floor(end / m)
+                    
+                    let p_min = p_lower_bound.max(10_usize.pow(l - 1));
+                    let p_max = p_upper_bound.min(10_usize.pow(l) - 1);
+
+                    if p_min <= p_max {
+                        for p in p_min..=p_max {
+                            found.insert(p * m);
+                        }
+                    }
+                }
+            }
+        }
+        found.into_iter().collect()
     }
 }
 
-struct ProductIdRanges(Vec<ProductIdRange>);
+    struct ProductIdRanges(Vec<ProductIdRange>);
 
-impl FromStr for ProductIdRanges {
+    impl FromStr for ProductIdRanges {
     type Err = Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         s.split(",")
