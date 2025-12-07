@@ -6,6 +6,7 @@ mod day3;
 mod day4;
 mod day5;
 mod day6;
+mod day7;
 
 fn main() {
     use std::env;
@@ -20,6 +21,7 @@ fn main() {
         day4::day,
         day5::day,
         day6::day,
+        day7::day,
     ];
     if let Ok(v) = args[1].parse::<usize>() {
         vec = vec![vec[v - 1]];
