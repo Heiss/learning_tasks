@@ -39,9 +39,7 @@ type Point3 = (usize, usize, usize);
 
 impl Distance<Point3> for Point3 {
     fn distance(&self, o: &Point3) -> usize {
-        (self.0.abs_diff(o.0)).pow(2)
-            + (self.1.abs_diff(o.1)).pow(2)
-            + (self.2.abs_diff(o.2)).pow(2)
+        self.0.abs_diff(o.0).pow(2) + self.1.abs_diff(o.1).pow(2) + self.2.abs_diff(o.2).pow(2)
     }
 
     fn get_x(&self) -> usize {
@@ -77,7 +75,7 @@ impl<T: Distance<T> + std::fmt::Debug + Copy> DSU<T> {
     }
 
     fn pop_smallest_distances(&mut self) -> Option<(usize, usize, usize)> {
-        self.distances.pop().map(|r| (r.0.1, r.0.2, r.0.0))
+        self.distances.pop().map(|r| (r.0 .1, r.0 .2, r.0 .0))
     }
 
     fn make_set(&mut self, value: T) {
