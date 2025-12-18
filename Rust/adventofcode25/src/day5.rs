@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::str::FromStr;
 
 struct IngredientId(usize);
@@ -50,7 +49,7 @@ impl IngredientRange {
         self.min <= v.0 && v.0 <= self.max
     }
 
-    fn get_fresh_ingredients(&self) -> Vec<usize> {
+    fn _get_fresh_ingredients(&self) -> Vec<usize> {
         (self.min..=self.max).collect()
     }
 
@@ -58,7 +57,7 @@ impl IngredientRange {
         self.max - self.min + 1
     }
 
-    fn distinct(self, o: IngredientRange) -> IngredientRanges {
+    fn _distinct(self, o: IngredientRange) -> IngredientRanges {
         let min = self.min.min(o.min);
         let max = self.max.max(o.max);
 

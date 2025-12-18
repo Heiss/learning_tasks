@@ -88,7 +88,7 @@ impl Safe {
             let (num, overflow) = rot.uniform(self.size);
             self.counter_any_zero_occured += overflow;
 
-            if let Rotation::Left(n) = rot {
+            if let Rotation::Left(_n) = rot {
                 if num <= self.current {
                     self.counter_any_zero_occured += 1;
                 } else {

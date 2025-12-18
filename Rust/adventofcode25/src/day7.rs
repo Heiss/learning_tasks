@@ -2,26 +2,26 @@ use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy)]
-struct Ray {
+struct _Ray {
     x: usize,
     y: usize,
 }
 
-impl Ray {
-    fn next_position(&self) -> Ray {
-        Ray {
+impl _Ray {
+    fn _next_position(&self) -> _Ray {
+        _Ray {
             x: self.x,
             y: self.y + 1,
         }
     }
 
-    fn split(&self) -> (Ray, Ray) {
+    fn _split(&self) -> (_Ray, _Ray) {
         (
-            Ray {
+            _Ray {
                 x: self.x - 1,
                 y: self.y,
             },
-            Ray {
+            _Ray {
                 x: self.x + 1,
                 y: self.y,
             },

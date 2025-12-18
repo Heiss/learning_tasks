@@ -1,7 +1,4 @@
-use itertools::Itertools;
 use std::str::FromStr;
-use std::fmt::Write;
-
 struct ProductIdRange {
     start: usize,
     end: usize,
@@ -9,7 +6,6 @@ struct ProductIdRange {
 
 #[derive(Debug)]
 enum Error {
-    NotValidRange,
 }
 impl FromStr for ProductIdRange {
     type Err = Error;
@@ -31,7 +27,7 @@ impl ProductIdRange {
         let mut found = std::collections::HashSet::new();
         let start = self.start;
         let end = self.end;
-        
+
         // Bestimme die Anzahl der Ziffern für Start und Ende
         let start_digits = if start == 0 { 1 } else { start.ilog10() + 1 };
         let end_digits = if end == 0 { 1 } else { end.ilog10() + 1 };
@@ -51,10 +47,10 @@ impl ProductIdRange {
 
                     // Wir suchen Zahlen N = P * m, die im Bereich [start, end] liegen.
                     // P muss genau l Stellen haben, also P in [10^(l-1), 10^l - 1]
-                    
+
                     let p_lower_bound = (start + m - 1) / m; // ceil(start / m)
-                    let p_upper_bound = end / m;             // floor(end / m)
-                    
+                    let p_upper_bound = end / m; // floor(end / m)
+
                     let p_min = p_lower_bound.max(10_usize.pow(l - 1));
                     let p_max = p_upper_bound.min(10_usize.pow(l) - 1);
 
@@ -70,9 +66,9 @@ impl ProductIdRange {
     }
 }
 
-    struct ProductIdRanges(Vec<ProductIdRange>);
+struct ProductIdRanges(Vec<ProductIdRange>);
 
-    impl FromStr for ProductIdRanges {
+impl FromStr for ProductIdRanges {
     type Err = Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         s.split(",")
@@ -97,7 +93,7 @@ impl<'a> ProductId<'a> {
         left == right
     }
 
-    fn repeating_pattern_inside(&self) -> bool {
+    fn _repeating_pattern_inside(&self) -> bool {
         let n = self.0.len();
         for i in 1..=n / 2 {
             // i is a divisor of n

@@ -85,7 +85,7 @@ impl FromStr for Banks {
     }
 }
 
-pub fn generate_combinations_with_12_ones(length: usize) -> Vec<String> {
+pub fn _generate_combinations_with_12_ones(length: usize) -> Vec<String> {
     // Sicherheitsprüfung: Länge muss mindestens 12 sein
     if length < 12 {
         return Vec::new();
@@ -95,12 +95,12 @@ pub fn generate_combinations_with_12_ones(length: usize) -> Vec<String> {
     let mut current_buffer = String::with_capacity(length);
 
     // Start der rekursiven Generierung
-    backtrack(length, 12, &mut current_buffer, &mut results);
+    _backtrack(length, 12, &mut current_buffer, &mut results);
 
     results
 }
 
-fn backtrack(
+fn _backtrack(
     remaining_len: usize,
     ones_needed: usize,
     buffer: &mut String,
@@ -131,11 +131,11 @@ fn backtrack(
     }
 
     buffer.push('0');
-    backtrack(remaining_len - 1, ones_needed, buffer, results);
+    _backtrack(remaining_len - 1, ones_needed, buffer, results);
     buffer.pop();
 
     buffer.push('1');
-    backtrack(remaining_len - 1, ones_needed - 1, buffer, results);
+    _backtrack(remaining_len - 1, ones_needed - 1, buffer, results);
     buffer.pop();
 }
 
